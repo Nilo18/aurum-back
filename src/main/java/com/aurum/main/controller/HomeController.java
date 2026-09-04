@@ -1,6 +1,9 @@
 package com.aurum.main.controller;
 
 import com.aurum.main.dto.requests.ContactRequest;
+import com.aurum.main.dto.requests.EmailRequest;
+import com.aurum.main.dto.responses.GenericResponse;
+import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.service.HomeService;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -22,9 +25,13 @@ public class HomeController {
         return ResponseEntity.ok("Hello world");
     }
 
+   @PostMapping("/verify-contact-request")
+   public ResponseEntity<OtpResponse> verify(@RequestBody EmailRequest email) {
+        return ResponseEntity.ok(homeService.sendContactRequestVerification(email));
+   }
+
     @PostMapping("/contact")
-    public ResponseEntity<Map<String, String>> contact(@Valid @RequestBody ContactRequest request) {
-        homeService.sendContactEmail(request);
-        return ResponseEntity.ok(Map.of("message", "Contact received successfully"));
+    public ResponseEntity<GenericResponse> contact(@Valid @RequestBody ContactRequest request) {
+        return ResponseEntity.ok(homeService.sendContactEmail(request));
     }
 }

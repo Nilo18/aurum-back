@@ -17,6 +17,10 @@ public record ContactRequest(
         @Email
         String emailAddress,
         @NotBlank(message = "Message is required")
-        String message
+        String message,
+        @NotBlank(message = "Transaction key is required")
+        String transactionKey,
+        @NotBlank(message = "Otp is required")
+        String otp
 ) {
 }
