@@ -9,6 +9,9 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Client {
     @Id
     private Long id;
+    private String name;
+    private String email;
+    private String phone;
     private ClientType type;
 
     public enum ClientType {
