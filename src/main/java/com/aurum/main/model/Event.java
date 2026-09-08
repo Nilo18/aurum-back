@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Table("events")
+@Table("event")
 public class Event {
 
     @Id
@@ -15,20 +15,12 @@ public class Event {
 
     private Long clientId;
 
-    private String eventType;
+    private EventType eventType;
     private LocalDate date;
     private BigDecimal totalCost;
     private Integer guestCount;
-    private String location;
-
-    private String cuisineType;
-    private String appetizer;
-    private String mainCourse;
-    private String dessert;
-    private String drinks;
-
+    private Location location;
     private String notes;
-
     private EventStatus status = EventStatus.REQUESTED;
 
     public enum EventStatus {
@@ -38,5 +30,31 @@ public class Event {
         COMPLETED,
         REJECTED,
         CANCELLED
+    }
+
+    public enum EventType {
+        WEDDING,
+        CORPORATE_EVENT,
+        CONFERENCE,
+        OFFICIAL_RECEPTION,
+        ANNIVERSARY,
+        BIRTHDAY,
+        GALA_DINNER,
+        PRODUCT_LAUNCH,
+        PRIVATE_PARTY,
+        OTHER
+    }
+
+    public enum Location {
+        AURUM_BANQUET_HALL,
+        AURUM_CONFERENCE_HALL,
+        PRIVATE_RESIDENCE,
+        PARTNER_VENUE,
+        HOTEL,
+        RESTAURANT,
+        OUTDOOR_VENUE,
+        HISTORICAL_VENUE,
+        CORPORATE_OFFICE,
+        OTHER
     }
 }

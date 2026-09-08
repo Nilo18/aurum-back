@@ -52,4 +52,8 @@ public class OtpService {
 
         return otpData.code.equals(userOtp);
     }
+
+    public void invalidateOtp(String transactionKey) {
+        inMemoryStorage.remove(transactionKey);
+    }
 }

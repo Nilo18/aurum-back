@@ -1,0 +1,6 @@
+ALTER TABLE menu_items
+ADD COLUMN cuisine_type VARCHAR(100) NOT NULL DEFAULT 'GENERAL' CHECK (cuisine_type IN (
+    'GEORGIAN',
+    'MEDITERRANEAN',
+    'GENERAL'
+))
