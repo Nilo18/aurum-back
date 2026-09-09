@@ -11,10 +11,12 @@ import java.math.BigDecimal;
 public class Employee {
     @Id
     private Long id;
-    private String firstName;
-    private String lastName;
+    private String name;
     private EmployeeType type;
     private BigDecimal salary;
+    private String email;
+    private String password;
+    private EmployeeRole role;
 
     public enum EmployeeType {
         SALES_MANAGER,
@@ -25,5 +27,12 @@ public class Employee {
         DRIVER,
         HOST,
         CHEF
+    }
+
+    public enum EmployeeRole {
+        OWNER,
+        ADMIN,
+        STAFF,
+        DEMO
     }
 }

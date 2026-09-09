@@ -1,4 +1,4 @@
-package com.aurum.main.security;
+package com.aurum.main.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

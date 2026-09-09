@@ -33,8 +33,9 @@ public class EventService {
         mailService.formatAndSend(
                 "nikalongurashvili@gmail.com",
                 request.email(),
-                "Contact Request Verification",
-                "Hello, here's your contact request verification code: " + otpResponse.otp()
+                "Event Creation Request Verification",
+                "Hello, here's your event creation request verification code: " +
+                        otpResponse.otp()
         );
 
         return new OtpResponse(otpResponse.transactionKey(), otpResponse.otp());
