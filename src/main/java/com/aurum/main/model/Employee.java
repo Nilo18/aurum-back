@@ -17,6 +17,7 @@ public class Employee {
     private String email;
     private String password;
     private EmployeeRole role;
+    private EmployeeStatus status;
 
     public enum EmployeeType {
         SALES_MANAGER,
@@ -34,5 +35,10 @@ public class Employee {
         ADMIN,
         STAFF,
         DEMO
+    }
+
+    public enum EmployeeStatus {
+        ACCEPTED,
+        PENDING
     }
 }

@@ -53,4 +53,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidRole(InvalidRoleException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
+
+    @ExceptionHandler(BadInvitationRequestException.class)
+    public ResponseEntity<Map<String, String>> handleBadInvitationRequest(BadInvitationRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvitationTokenNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleInvitationTokenNotFound(InvitationTokenNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvitationTokenExpiredException.class)
+    public ResponseEntity<Map<String, String>> handleInvitationTokenExpired(InvitationTokenExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
 }
