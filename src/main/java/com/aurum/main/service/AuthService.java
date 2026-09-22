@@ -63,4 +63,10 @@ public class AuthService {
 
         return new AuthResponse(200, token);
     }
+
+    public AuthResponse loginAsDemo() {
+        String token = jwtService.generateDemoToken();
+
+        return new AuthResponse(200, token);
+    }
 }

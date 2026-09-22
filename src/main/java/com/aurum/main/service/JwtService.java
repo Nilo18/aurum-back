@@ -2,6 +2,7 @@ package com.aurum.main.service;
 
 import com.aurum.main.model.Employee;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -28,7 +29,9 @@ public class JwtService {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    public String generateToken(String subject, Employee.EmployeeRole role, Long employeeId) {
+    public String generateToken(
+            String subject, Employee.EmployeeRole role,
+            Long employeeId, Date expiration) {
         Map<String, Object> claims = new HashMap<>();
 
         claims.put("role", role.name());
@@ -37,12 +40,22 @@ public class JwtService {
             claims.put("employeeId", employeeId);
         }
 
-        return Jwts.builder()
+        Date now = new Date();
+
+        JwtBuilder builder = Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .issuedAt(new Date())
-//                .expiration(expiration)
-                .signWith(getSigningKey())
+                .issuedAt(new Date());
+
+        if (expiration != null) {
+            if (!expiration.after(now)) {
+                throw new IllegalArgumentException("Expiration must be in the future");
+            }
+
+            builder.expiration(expiration);
+        }
+
+        return builder.signWith(getSigningKey())
                 .compact();
     }
 
@@ -50,7 +63,8 @@ public class JwtService {
         return generateToken(
                 employee.getEmail(),
                 Employee.EmployeeRole.valueOf(employee.getRole().name()),
-                employee.getId()
+                employee.getId(),
+                null
         );
     }
 
@@ -58,7 +72,8 @@ public class JwtService {
         return generateToken(
                 "demo",
                 Employee.EmployeeRole.DEMO,
-                null
+                null,
+                new Date(System.currentTimeMillis() * 60 * 60 * 1000)
         );
     }
 
