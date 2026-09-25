@@ -1,15 +1,19 @@
 package com.aurum.main.service;
 
+import com.aurum.main.dto.EventDTO;
 import com.aurum.main.dto.requests.EmailRequest;
 import com.aurum.main.dto.requests.EventOrderRequest;
+import com.aurum.main.dto.requests.EventQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.InvalidOtpException;
 import com.aurum.main.model.Client;
 import com.aurum.main.model.Event;
 import com.aurum.main.model.MenuItem;
 import com.aurum.main.repository.ClientRepository;
 import com.aurum.main.repository.EventRepository;
+import com.aurum.main.repository.EventRepositoryCustom;
 import com.aurum.main.repository.MenuItemRepository;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import java.util.List;
 public class EventService {
     private final ClientRepository clientRepository;
     private final EventRepository eventRepository;
+    private final EventRepositoryCustom eventRepositoryCustom;
     private final MenuItemRepository menuItemRepository;
     private final MailService mailService;
     private final OtpService otpService;
@@ -80,5 +85,9 @@ public class EventService {
         otpService.invalidateOtp(request.transactionKey());
 
         return new GenericResponse(200, "Event added successfully!");
+    }
+
+    public PageResponse<EventDTO> getEvents(EventQuery query) {
+        return eventRepositoryCustom.searchEvents(query);
     }
 }

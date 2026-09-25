@@ -1,17 +1,17 @@
 package com.aurum.main.controller;
 
+import com.aurum.main.dto.EventDTO;
 import com.aurum.main.dto.requests.EmailRequest;
 import com.aurum.main.dto.requests.EventOrderRequest;
+import com.aurum.main.dto.requests.EventQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.EventService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Data
@@ -27,5 +27,10 @@ public class EventController {
     @PostMapping
     public ResponseEntity<GenericResponse> createEvent(@Valid @RequestBody EventOrderRequest request) {
         return ResponseEntity.ok(eventService.createEvent(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<EventDTO>> getEvents(@ModelAttribute EventQuery query) {
+        return ResponseEntity.ok(eventService.getEvents(query));
     }
 }

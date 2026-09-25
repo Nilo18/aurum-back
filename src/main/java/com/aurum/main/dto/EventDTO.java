@@ -7,15 +7,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record EventDTO(
-        @NotNull(message = "Event type is required")
+        String clientName,
         Event.EventType eventType,
-        @NotNull(message = "Event date is required")
         LocalDate date,
         BigDecimal totalCost,
-        @NotNull(message = "Guest count is required")
         Integer guestCount,
-        @NotNull(message = "Location is required")
         Event.Location location,
-        String notes
+        Event.EventStatus status
 ) {
 }

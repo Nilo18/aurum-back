@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,8 +27,24 @@ public class GlobalExceptionHandler {
 
         // Loop through all validation failures
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
+            if (!(error instanceof FieldError fieldError)) {
+                errors.put("error", error.getDefaultMessage());
+                return;
+            }
+            String fieldName = fieldError.getField();
             String errorMessage = error.getDefaultMessage();
+            if (fieldError.isBindingFailure()) {
+                Class<?> fieldType = ex.getBindingResult().getFieldType(fieldName);
+                if (fieldType != null && fieldType.isEnum()) {
+                    String allowedValues = Arrays.stream(fieldType.getEnumConstants())
+                            .map(value -> ((Enum<?>) value).name())
+                            .collect(Collectors.joining(", "));
+                    errorMessage = "Invalid value. Allowed values: " + allowedValues
+                            + ". Values are case-sensitive.";
+                } else {
+                    errorMessage = "Invalid value or format.";
+                }
+            }
             errors.put(fieldName, errorMessage);
         });
 

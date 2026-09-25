@@ -1,7 +1,6 @@
 package com.aurum.main.dto.requests;
 
 import com.aurum.main.dto.ClientDTO;
-import com.aurum.main.dto.EventDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +13,7 @@ public record EventOrderRequest(
         ClientDTO client,
         @Valid
         @NotNull(message = "Event info is required")
-        EventDTO event,
+        EventCreationRequest event,
         @NotNull(message = "Dishes from the menu must be selected")
         List<Long> menuItemIds,
         @NotBlank(message = "Transaction key is required")
