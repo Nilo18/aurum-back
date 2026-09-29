@@ -103,8 +103,10 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom {
         String cleanSortBy = "e.id";
         if ("date".equalsIgnoreCase(query.getSortBy())) {
             cleanSortBy = "e.date";
-        } else if ("cost".equalsIgnoreCase(query.getSortBy())) {
+        } else if ("totalCost".equalsIgnoreCase(query.getSortBy())) {
             cleanSortBy = "e.total_cost";
+        } else if ("guestCount".equalsIgnoreCase(query.getSortBy())) {
+            cleanSortBy = "e.guest_count";
         } else {
             cleanSortBy = "c.name";
         }
