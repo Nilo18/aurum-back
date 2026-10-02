@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface ClientRepository extends CrudRepository<Client, Long> {
     boolean existsByEmail(String email);
     Optional<Client> findFirstByEmailOrPhone(String email, String phone);
+    Optional<Client> findByEmail(String email);
+    int deleteByEmail(String email);
 }
