@@ -17,11 +17,11 @@ import java.util.Map;
 
 @Repository
 @Data
-public class EventRepositoryCustomImpl implements EventRepositoryCustom {
+public class EventRepositoryCustomImpl implements SearchStrategy<EventDTO, EventQuery> {
     private final JdbcClient jdbcClient;
 
     @Override
-    public PageResponse<EventDTO> searchEvents(EventQuery query) {
+    public PageResponse<EventDTO> search(EventQuery query) {
         DynamicSqlBuilder builder = new DynamicSqlBuilder(
                 """
                 SELECT\s

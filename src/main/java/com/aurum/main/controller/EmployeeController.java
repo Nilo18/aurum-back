@@ -1,24 +1,29 @@
 package com.aurum.main.controller;
 
+import com.aurum.main.dto.EmployeeDTO;
 import com.aurum.main.dto.requests.CompleteInviteRegistrationRequest;
+import com.aurum.main.dto.requests.EmployeeQuery;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.requests.InviteEmployeeRequest;
 import com.aurum.main.dto.responses.AuthResponse;
 import com.aurum.main.dto.responses.GenericResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Data
 @RequestMapping(path = "/api/employee")
 public class EmployeeController {
     private final EmployeeService employeeService;
+
+    @GetMapping
+    public ResponseEntity<PageResponse<EmployeeDTO>> getEmployees(@ModelAttribute EmployeeQuery query) {
+        return ResponseEntity.ok(employeeService.getEmployees(query));
+    }
 
     @PostMapping(path = "/invite")
     public ResponseEntity<GenericResponse> inviteEmployee(

@@ -8,7 +8,7 @@ import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.ClientNotFoundException;
 import com.aurum.main.model.Client;
 import com.aurum.main.repository.ClientRepository;
-import com.aurum.main.repository.ClientRepositoryCustom;
+import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Data
 public class ClientService {
-    private final ClientRepositoryCustom clientRepositoryCustom;
+//    private final ClientRepositoryCustom clientRepositoryCustom;
     private final ClientRepository clientRepository;
+    private final SearchStrategy<ClientDTO, ClientQuery> clientStrategy;
 
     public PageResponse<ClientDTO> getClients(ClientQuery clientQuery) {
-        return clientRepositoryCustom.searchClients(clientQuery);
+        return clientStrategy.search(clientQuery);
     }
 
     @Transactional

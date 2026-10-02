@@ -1,8 +1,7 @@
 package com.aurum.main.repository;
 
-import com.aurum.main.dto.ClientDTO;
-import com.aurum.main.dto.EventDTO;
-import com.aurum.main.dto.requests.ClientQuery;
+import com.aurum.main.dto.EmployeeDTO;
+import com.aurum.main.dto.requests.EmployeeQuery;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.utils.DynamicSqlBuilder;
 import lombok.Data;
@@ -11,66 +10,76 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Repository
 @Data
-public class ClientRepositoryCustomImpl implements SearchStrategy<ClientDTO, ClientQuery> {
+public class EmployeeRepositoryCustomImpl implements SearchStrategy<EmployeeDTO, EmployeeQuery> {
     private final JdbcClient jdbcClient;
 
     @Override
-    public PageResponse<ClientDTO> search(ClientQuery query) {
+    public PageResponse<EmployeeDTO> search(EmployeeQuery query) {
         DynamicSqlBuilder builder = new DynamicSqlBuilder(
                 """
                 SELECT
-                    c.type AS client_type,
-                    c.name,
-                    c.email,
-                    c.phone
-                FROM client c
+                    e.type AS specialty,
+                    e.name,
+                    e.salary,
+                    e.email,
+                    e.role,
+                    e.status
+                FROM employees e
                 WHERE 1 = 1
                 """,
-                "SELECT COUNT(*) FROM client c WHERE 1 = 1"
+                "SELECT COUNT(*) FROM employees e WHERE 1 = 1"
         );
 
-// 2. Declarative filter assembly
         builder
                 .addCondition(
                         StringUtils.hasText(query.getSearch()),
-                        " AND (LOWER(c.name) LIKE :search " +
-                                "OR LOWER(c.email) LIKE :search " +
-                                "OR LOWER(c.phone) LIKE :search) ",
-                        "search", query.getSearch() != null ? "%" + query.getSearch().toLowerCase() + "%" : null
+                        " AND (LOWER(e.name) LIKE :search OR LOWER(e.email) LIKE :search) ",
+                        "search", query.getSearch() != null ? "%" + query.getSearch().toLowerCase(Locale.ROOT) + "%" : null
                 )
                 .addCondition(
                         query.getType() != null,
-                        " AND c.type = :type ",
+                        " AND e.type = :type ",
                         "type", query.getType() != null ?
                                 query.getType().name() : null
+                )
+                .addCondition(
+                        query.getRole() != null,
+                        " AND e.role = :role ",
+                        "role", query.getRole() != null ? query.getRole().name() : null
+                )
+                .addCondition(
+                        query.getStatus() != null,
+                        " AND e.status = :status ",
+                        "status", query.getStatus() != null ? query.getStatus().name() : null
                 );
 
-        // 3. Extract your final queries and parameters
         String finalSql = String.valueOf(builder.getSql());
         String finalCountSql = String.valueOf(builder.getCountSql());
         Map<String, Object> params = builder.getParams();
 
-        String cleanSortBy = "c.id";
-        if ("type".equalsIgnoreCase(query.getSortBy())) {
-            cleanSortBy = "c.type";
-        } else if ("name".equalsIgnoreCase(query.getSortBy())) {
-            cleanSortBy = "c.name";
+        String cleanSortBy = "e.id";
+        if ("name".equalsIgnoreCase(query.getSortBy())) {
+            cleanSortBy = "e.name";
         } else if ("email".equalsIgnoreCase(query.getSortBy())) {
-            cleanSortBy = "c.email";
-        } else {
-            cleanSortBy = "c.phone";
+            cleanSortBy = "e.email";
+        } else if ("salary".equalsIgnoreCase(query.getSortBy())) {
+            cleanSortBy = "e.salary";
         }
 
         String cleanSortDir = "DESC".equalsIgnoreCase(query.getSortDirection()) ? "DESC" : "ASC";
         finalSql += " ORDER BY " + cleanSortBy + " " + cleanSortDir;
+        if (!"e.id".equals(cleanSortBy)) {
+            finalSql += ", e.id ASC";
+        }
 
         int pageSize = (query.getSize() != null && query.getSize() > 0) ? query.getSize() : 10;
         int pageNumber = (query.getPage() != null && query.getPage() >= 0) ? query.getPage() : 0;
-        int offset = pageNumber * pageSize;
+        long offset = (long) pageNumber * pageSize;
 
         finalSql += " LIMIT :limit OFFSET :offset ";
         params.put("limit", pageSize);
@@ -81,12 +90,12 @@ public class ClientRepositoryCustomImpl implements SearchStrategy<ClientDTO, Cli
                 .query(Long.class)
                 .single();
 
-        List<ClientDTO> content = jdbcClient.sql(finalSql)
+        List<EmployeeDTO> content = jdbcClient.sql(finalSql)
                 .params(params)
-                .query(ClientDTO.class)
+                .query(EmployeeDTO.class)
                 .list();
 
-        return new PageResponse<ClientDTO>(
+        return new PageResponse<EmployeeDTO>(
                 content,
                 pageNumber,
                 pageSize,

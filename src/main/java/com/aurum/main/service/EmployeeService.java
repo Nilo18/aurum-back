@@ -1,10 +1,13 @@
 package com.aurum.main.service;
 
+import com.aurum.main.dto.EmployeeDTO;
 import com.aurum.main.dto.requests.CompleteInviteRegistrationRequest;
+import com.aurum.main.dto.requests.EmployeeQuery;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.requests.InviteEmployeeRequest;
 import com.aurum.main.dto.responses.AuthResponse;
 import com.aurum.main.dto.responses.GenericResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.BadInvitationRequestException;
 import com.aurum.main.exception.InvitationTokenExpiredException;
 import com.aurum.main.exception.InvitationTokenNotFoundException;
@@ -12,6 +15,7 @@ import com.aurum.main.model.Employee;
 import com.aurum.main.model.Invitation;
 import com.aurum.main.repository.EmployeeRepository;
 import com.aurum.main.repository.InvitationRepository;
+import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +33,7 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final SearchStrategy<EmployeeDTO, EmployeeQuery> employeeStrategy;
 
     @Value("${spring.mail.username}")
     private String ownerMail;
@@ -108,5 +113,9 @@ public class EmployeeService {
         String token = jwtService.generateEmployeeToken(employee);
 
         return new AuthResponse(200, token);
+    }
+
+    public PageResponse<EmployeeDTO> getEmployees(EmployeeQuery query) {
+        return employeeStrategy.search(query);
     }
 }
