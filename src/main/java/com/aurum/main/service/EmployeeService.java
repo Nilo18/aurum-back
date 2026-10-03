@@ -1,16 +1,11 @@
 package com.aurum.main.service;
 
 import com.aurum.main.dto.EmployeeDTO;
-import com.aurum.main.dto.requests.CompleteInviteRegistrationRequest;
-import com.aurum.main.dto.requests.EmployeeQuery;
-import com.aurum.main.dto.requests.InvitationTokenRequest;
-import com.aurum.main.dto.requests.InviteEmployeeRequest;
+import com.aurum.main.dto.requests.*;
 import com.aurum.main.dto.responses.AuthResponse;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
-import com.aurum.main.exception.BadInvitationRequestException;
-import com.aurum.main.exception.InvitationTokenExpiredException;
-import com.aurum.main.exception.InvitationTokenNotFoundException;
+import com.aurum.main.exception.*;
 import com.aurum.main.model.Employee;
 import com.aurum.main.model.Invitation;
 import com.aurum.main.repository.EmployeeRepository;
@@ -117,5 +112,21 @@ public class EmployeeService {
 
     public PageResponse<EmployeeDTO> getEmployees(EmployeeQuery query) {
         return employeeStrategy.search(query);
+    }
+
+    public GenericResponse deleteEmployee(EmailRequest request) {
+        int rowsDeleted = employeeRepository.deleteNonOwner(request.email());
+
+        if (rowsDeleted == 0) {
+            Employee employee = employeeRepository.findByEmail(request.email())
+                    .orElseThrow(() ->
+                            new EmployeeNotFoundException("Employee not found"));
+
+            if (employee.getRole() == Employee.EmployeeRole.OWNER) {
+                throw new OwnerDeletionException("Owner cannot be deleted");
+            }
+        }
+
+        return new GenericResponse(200, "Employee was deleted successfully");
     }
 }

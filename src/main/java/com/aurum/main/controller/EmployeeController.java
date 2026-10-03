@@ -1,10 +1,7 @@
 package com.aurum.main.controller;
 
 import com.aurum.main.dto.EmployeeDTO;
-import com.aurum.main.dto.requests.CompleteInviteRegistrationRequest;
-import com.aurum.main.dto.requests.EmployeeQuery;
-import com.aurum.main.dto.requests.InvitationTokenRequest;
-import com.aurum.main.dto.requests.InviteEmployeeRequest;
+import com.aurum.main.dto.requests.*;
 import com.aurum.main.dto.responses.AuthResponse;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
@@ -41,5 +38,10 @@ public class EmployeeController {
     public ResponseEntity<AuthResponse> completeRegistration(
             @Valid @RequestBody CompleteInviteRegistrationRequest request) {
         return ResponseEntity.ok(employeeService.completeInviteRegistration(request));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<GenericResponse> deleteEmployee(@Valid @RequestBody EmailRequest request) {
+        return ResponseEntity.ok(employeeService.deleteEmployee(request));
     }
 }

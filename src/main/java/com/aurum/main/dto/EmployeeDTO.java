@@ -8,7 +8,7 @@ public record EmployeeDTO(
         Employee.EmployeeType specialty,
         String name,
         BigDecimal salary,
-        String Email,
+        String email,
         Employee.EmployeeRole role,
         Employee.EmployeeStatus status
 ) {

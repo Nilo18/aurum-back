@@ -108,4 +108,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDatabaseError(DataAccessException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "A database error occurred. Please try again later."));
     }
+
+    @ExceptionHandler(OwnerDeletionException.class)
+    public ResponseEntity<Map<String, String>> handleOwnerDeletionException(OwnerDeletionException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
 }
