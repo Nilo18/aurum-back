@@ -21,4 +21,5 @@ public interface EventRepository extends CrudRepository<Event, Long> {
     @Query("""
     SELECT SUM(e.total_cost) FROM event e WHERE e.status NOT IN ('CANCELLED', 'REJECTED')""")
     BigDecimal sumTotalValue();
+    int deleteEventById(Long id);
 }

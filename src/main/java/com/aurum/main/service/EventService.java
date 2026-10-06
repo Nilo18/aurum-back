@@ -7,6 +7,7 @@ import com.aurum.main.dto.requests.EventQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
+import com.aurum.main.exception.EventNotFoundException;
 import com.aurum.main.exception.InvalidOtpException;
 import com.aurum.main.model.Client;
 import com.aurum.main.model.Event;
@@ -87,5 +88,19 @@ public class EventService {
 
     public PageResponse<EventDTO> getEvents(EventQuery query) {
         return eventStrategy.search(query);
+    }
+
+    public GenericResponse deleteEvent(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id must not be null");
+        }
+
+        int row = eventRepository.deleteEventById(id);
+
+        if (row == 0) {
+            throw new EventNotFoundException("Event not found");
+        }
+
+        return new GenericResponse(200, "Deleted successfully");
     }
 }

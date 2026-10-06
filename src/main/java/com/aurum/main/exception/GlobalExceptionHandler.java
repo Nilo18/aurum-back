@@ -113,4 +113,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleOwnerDeletionException(OwnerDeletionException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
     }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEventNotFoundException(EventNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
 }

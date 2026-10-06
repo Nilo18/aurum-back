@@ -33,4 +33,9 @@ public class EventController {
     public ResponseEntity<PageResponse<EventDTO>> getEvents(@ModelAttribute EventQuery query) {
         return ResponseEntity.ok(eventService.getEvents(query));
     }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<GenericResponse> deleteEvent(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.deleteEvent(id));
+    }
 }
