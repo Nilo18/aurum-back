@@ -1,5 +1,6 @@
 package com.aurum.main.exception;
 
+import lombok.extern.java.Log;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Log
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> genericExceptionHandler(Exception ex) {
@@ -99,7 +101,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<Map<String, String>> handleConflict(DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Cannot delete client because they have active related records."));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
     // 3. Handles unexpected system/database crashes

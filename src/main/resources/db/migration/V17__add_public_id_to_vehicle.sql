@@ -1,0 +1,2 @@
+ALTER TABLE vehicle
+    ADD COLUMN publicId VARCHAR(30) NOT NULL

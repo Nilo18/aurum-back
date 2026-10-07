@@ -24,6 +24,7 @@ public class VehicleRepositoryImpl implements SearchStrategy<VehicleDTO, Vehicle
                 """
                 SELECT
                     v.type,
+                    v.public_id,
                     v.passenger_capacity,
                     v.cargo_weight_limit
                 FROM vehicle v
@@ -33,11 +34,6 @@ public class VehicleRepositoryImpl implements SearchStrategy<VehicleDTO, Vehicle
         );
 
         builder
-                .addCondition(
-                        StringUtils.hasText(query.getSearch()),
-                        " AND LOWER(v.type) LIKE :search ",
-                        "search", query.getSearch() != null ? "%" + query.getSearch().toLowerCase(Locale.ROOT) + "%" : null
-                )
                 .addCondition(
                         query.getType() != null,
                         " AND v.type = :type ",

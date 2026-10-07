@@ -1,0 +1,3 @@
+ALTER TABLE vehicle
+    ALTER COLUMN public_id TYPE VARCHAR(36)
+    COMMIT
