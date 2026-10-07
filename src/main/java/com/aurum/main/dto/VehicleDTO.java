@@ -1,0 +1,12 @@
+package com.aurum.main.dto;
+
+import com.aurum.main.model.Vehicle;
+
+import java.math.BigDecimal;
+
+public record VehicleDTO(
+        Vehicle.VehicleType type,
+        Long passengerCapacity,
+        BigDecimal cargoWeightLimit
+) {
+}
