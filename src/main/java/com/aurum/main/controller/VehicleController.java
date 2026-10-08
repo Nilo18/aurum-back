@@ -25,4 +25,9 @@ public class VehicleController {
     public ResponseEntity<GenericResponse> createVehicle(@Valid @RequestBody VehicleDTO body) {
         return ResponseEntity.ok(vehicleService.addVehicle(body));
     }
+
+    @DeleteMapping(path = "/{publicId}")
+    public ResponseEntity<GenericResponse> deleteVehicle(@PathVariable String publicId) {
+        return ResponseEntity.ok(vehicleService.deleteVehicle(publicId));
+    }
 }

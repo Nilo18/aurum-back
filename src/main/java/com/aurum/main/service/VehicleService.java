@@ -4,6 +4,7 @@ import com.aurum.main.dto.VehicleDTO;
 import com.aurum.main.dto.requests.VehicleQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
+import com.aurum.main.exception.VehicleNotFoundException;
 import com.aurum.main.model.Vehicle;
 import com.aurum.main.repository.SearchStrategy;
 import com.aurum.main.repository.VehicleRepository;
@@ -32,5 +33,15 @@ public class VehicleService {
         vehicle.setCargoWeightLimit(data.cargoWeightLimit());
         vehicleRepository.save(vehicle);
         return new GenericResponse(200, "Vehicle created successfully");
+    }
+
+    public GenericResponse deleteVehicle(String publicId) {
+        int deleted = vehicleRepository.deleteByPublicId(publicId);
+
+        if (deleted == 0) {
+            throw new VehicleNotFoundException("Vehicle not found");
+        }
+
+        return new GenericResponse(200, "Vehicle deleted successfully");
     }
 }
