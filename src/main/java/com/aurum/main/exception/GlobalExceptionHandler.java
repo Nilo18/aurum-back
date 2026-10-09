@@ -137,4 +137,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(Map.of("error", message));
     }
+
+    @ExceptionHandler(SupplierNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSupplierNotFound(SupplierNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
 }

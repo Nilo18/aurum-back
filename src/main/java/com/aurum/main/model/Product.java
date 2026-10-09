@@ -10,9 +10,18 @@ import java.math.BigDecimal;
 public class Product {
     @Id
     private Long id;
+    private String publicId;
     private String productName;
     private String category;
     private BigDecimal price;
     private Long supplierId;
-    private BigDecimal quantity;
+    private Integer quantity;
+
+    public enum ProductCategory {
+        TABLEWARE,
+        GLASSWARE,
+        FLORALS,
+        DECORATION,
+        FOOD_INGREDIENT
+    }
 }

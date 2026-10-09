@@ -3,6 +3,7 @@ package com.aurum.main.dto.requests;
 import com.aurum.main.model.Event;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -10,8 +11,8 @@ public class EventQuery {
     private Integer page = 0;
     private Integer size = 10;
     private Event.EventType eventType;
-    private Integer costFrom;
-    private Integer costTo;
+    private BigDecimal costFrom;
+    private BigDecimal costTo;
     private Integer guestFrom;
     private Integer guestTo;
     private LocalDate eventFrom;
