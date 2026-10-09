@@ -24,7 +24,7 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericResponse> createVehicle(@Valid @RequestBody CreateVehicleRequest body) {
+    public ResponseEntity<VehicleDTO> createVehicle(@Valid @RequestBody CreateVehicleRequest body) {
         return ResponseEntity.ok(vehicleService.addVehicle(body));
     }
 

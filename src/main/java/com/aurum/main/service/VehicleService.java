@@ -28,14 +28,20 @@ public class VehicleService {
         return strategy.search(query);
     }
 
-    public GenericResponse addVehicle(CreateVehicleRequest data) {
+    public VehicleDTO addVehicle(CreateVehicleRequest data) {
         Vehicle vehicle = new Vehicle();
         vehicle.setType(data.type());
-        vehicle.setPublicId(UUID.randomUUID().toString());
+        String publicId = UUID.randomUUID().toString();
+        vehicle.setPublicId(publicId);
         vehicle.setPassengerCapacity(data.passengerCapacity());
         vehicle.setCargoWeightLimit(data.cargoWeightLimit());
         vehicleRepository.save(vehicle);
-        return new GenericResponse(200, "Vehicle created successfully");
+        return new VehicleDTO(
+                data.type(),
+                publicId,
+                data.passengerCapacity(),
+                data.cargoWeightLimit()
+        );
     }
 
     public GenericResponse deleteVehicle(String publicId) {

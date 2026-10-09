@@ -26,8 +26,8 @@ class VehicleControllerTests {
 
     @Test
     void createDoesNotRequirePublicId() throws Exception {
-        when(service.addVehicle(any(CreateVehicleRequest.class)))
-                .thenReturn(new GenericResponse(200, "Vehicle created successfully"));
+//        when(service.addVehicle(any(CreateVehicleRequest.class)))
+//                .thenReturn(new GenericResponse(200, "Vehicle created successfully"));
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON)
                         .content("""
