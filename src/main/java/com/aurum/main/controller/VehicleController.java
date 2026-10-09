@@ -1,6 +1,8 @@
 package com.aurum.main.controller;
 
 import com.aurum.main.dto.VehicleDTO;
+import com.aurum.main.dto.requests.CreateVehicleRequest;
+import com.aurum.main.dto.requests.UpdateVehicleRequest;
 import com.aurum.main.dto.requests.VehicleQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
@@ -22,8 +24,13 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericResponse> createVehicle(@Valid @RequestBody VehicleDTO body) {
+    public ResponseEntity<GenericResponse> createVehicle(@Valid @RequestBody CreateVehicleRequest body) {
         return ResponseEntity.ok(vehicleService.addVehicle(body));
+    }
+
+    @PutMapping
+    public ResponseEntity<VehicleDTO> updateVehicle(@Valid @RequestBody UpdateVehicleRequest body) {
+        return ResponseEntity.ok(vehicleService.updateVehicle(body));
     }
 
     @DeleteMapping(path = "/{publicId}")

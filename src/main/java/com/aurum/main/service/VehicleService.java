@@ -1,6 +1,8 @@
 package com.aurum.main.service;
 
 import com.aurum.main.dto.VehicleDTO;
+import com.aurum.main.dto.requests.CreateVehicleRequest;
+import com.aurum.main.dto.requests.UpdateVehicleRequest;
 import com.aurum.main.dto.requests.VehicleQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
@@ -11,6 +13,7 @@ import com.aurum.main.repository.VehicleRepository;
 import lombok.Data;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -25,7 +28,7 @@ public class VehicleService {
         return strategy.search(query);
     }
 
-    public GenericResponse addVehicle(VehicleDTO data) {
+    public GenericResponse addVehicle(CreateVehicleRequest data) {
         Vehicle vehicle = new Vehicle();
         vehicle.setType(data.type());
         vehicle.setPublicId(UUID.randomUUID().toString());
@@ -43,5 +46,17 @@ public class VehicleService {
         }
 
         return new GenericResponse(200, "Vehicle deleted successfully");
+    }
+
+    public VehicleDTO updateVehicle(UpdateVehicleRequest updatedVehicle) {
+        Vehicle vehicle = vehicleRepository.findByPublicId(updatedVehicle.publicId())
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found"));
+        vehicle.setType(updatedVehicle.type());
+        vehicle.setCargoWeightLimit(updatedVehicle.cargoWeightLimit());
+        vehicle.setPassengerCapacity(updatedVehicle.passengerCapacity());
+        vehicleRepository.save(vehicle);
+
+        return new VehicleDTO(updatedVehicle.type(), updatedVehicle.publicId(),
+                updatedVehicle.passengerCapacity(), updatedVehicle.cargoWeightLimit());
     }
 }
