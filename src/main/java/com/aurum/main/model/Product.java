@@ -12,7 +12,7 @@ public class Product {
     private Long id;
     private String publicId;
     private String productName;
-    private String category;
+    private ProductCategory category;
     private BigDecimal price;
     private Long supplierId;
     private Integer quantity;

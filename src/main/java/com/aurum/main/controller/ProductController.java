@@ -1,15 +1,13 @@
 package com.aurum.main.controller;
 
 import com.aurum.main.dto.ProductDTO;
+import com.aurum.main.dto.requests.CreateProductRequest;
 import com.aurum.main.dto.requests.ProductQuery;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.ProductService;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/product")
@@ -20,5 +18,10 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<PageResponse<ProductDTO>> getProducts(@ModelAttribute ProductQuery query) {
         return ResponseEntity.ok(productService.getProducts(query));
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductDTO> addProduct(@RequestBody CreateProductRequest request) {
+        return ResponseEntity.ok(productService.addProduct(request));
     }
 }
