@@ -3,6 +3,7 @@ package com.aurum.main.service;
 import com.aurum.main.dto.ProductDTO;
 import com.aurum.main.dto.requests.CreateProductRequest;
 import com.aurum.main.dto.requests.ProductQuery;
+import com.aurum.main.dto.requests.UpdateProductRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.ProductAlreadyExistsException;
@@ -52,6 +53,27 @@ public class ProductService {
         product.setPrice(request.price());
         String publicId = UUID.randomUUID().toString();
         product.setPublicId(publicId);
+        product = productRepository.save(product);
+
+        return new ProductDTO(
+                product.getPublicId(),
+                product.getProductName(),
+                product.getCategory(),
+                product.getPrice(),
+                product.getSupplierId(),
+                product.getQuantity()
+        );
+    }
+
+    public ProductDTO updateProduct(UpdateProductRequest request) {
+        Product product = productRepository.findByPublicId(request.publicId())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        product.setProductName(request.productName());
+        product.setCategory(request.category());
+        product.setSupplierId(request.supplierId());
+        product.setQuantity(request.quantity());
+        product.setPrice(request.price());
         product = productRepository.save(product);
 
         return new ProductDTO(
