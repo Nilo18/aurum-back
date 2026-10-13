@@ -3,6 +3,7 @@ package com.aurum.main.controller;
 import com.aurum.main.dto.ProductDTO;
 import com.aurum.main.dto.requests.CreateProductRequest;
 import com.aurum.main.dto.requests.ProductQuery;
+import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.ProductService;
 import lombok.Data;
@@ -23,5 +24,10 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDTO> addProduct(@RequestBody CreateProductRequest request) {
         return ResponseEntity.ok(productService.addProduct(request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GenericResponse> deleteProduct(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.deleteProduct(id));
     }
 }

@@ -3,8 +3,10 @@ package com.aurum.main.service;
 import com.aurum.main.dto.ProductDTO;
 import com.aurum.main.dto.requests.CreateProductRequest;
 import com.aurum.main.dto.requests.ProductQuery;
+import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.ProductAlreadyExistsException;
+import com.aurum.main.exception.ProductNotFoundException;
 import com.aurum.main.exception.SupplierNotFoundException;
 import com.aurum.main.model.Product;
 import com.aurum.main.model.Supplier;
@@ -34,8 +36,9 @@ public class ProductService {
     }
 
     public ProductDTO addProduct(CreateProductRequest request) {
-        Supplier supplier = supplierRepository.findById(request.supplierId())
-                .orElseThrow(() -> new SupplierNotFoundException("Supplier not found"));
+        if (!supplierRepository.existsById(request.supplierId())) {
+            throw new SupplierNotFoundException("Supplier not found");
+        }
 
         if (productRepository.existsByProductName(request.productName())) {
             throw new ProductAlreadyExistsException("Product already exists");
@@ -59,5 +62,15 @@ public class ProductService {
                 product.getSupplierId(),
                 product.getQuantity()
         );
+    }
+
+    public GenericResponse deleteProduct(Long id) {
+        int deleted = productRepository.deleteByIdReturningInt(id);
+
+        if (deleted == 0) {
+            throw new ProductNotFoundException("Product not found");
+        }
+
+        return new GenericResponse(200, "Product deleted successfully");
     }
 }
