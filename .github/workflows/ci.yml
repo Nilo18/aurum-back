@@ -22,3 +22,13 @@ jobs:
 
       - name: Build and test
         run: mvn -B verify
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/aurum
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_MAIL_HOST: localhost
+          SPRING_MAIL_PORT: 587
+          SPRING_MAIL_USERNAME: test@example.com
+          SPRING_MAIL_PASSWORD: dummy
+          JWT_SECRET: ci-only-dummy-secret-at-least-32-characters-long
+          JWT_EXPIRATION_MS: 86400000
