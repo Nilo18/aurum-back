@@ -22,17 +22,12 @@ class VehicleServiceTests {
     private final VehicleService service = new VehicleService(repository, strategy);
 
     @Test
-    void updateSavesExistingVehicleAndReturnsReloadedValues() {
+    void updateSavesExistingVehicleAndReturnsUpdatedValues() {
         Vehicle existing = new Vehicle();
         existing.setId(42L);
         existing.setPublicId("vehicle-public-id");
-        Vehicle reloaded = new Vehicle();
-        reloaded.setPublicId(existing.getPublicId());
-        reloaded.setType(Vehicle.VehicleType.TRUCK);
-        reloaded.setPassengerCapacity(2L);
-        reloaded.setCargoWeightLimit(new BigDecimal("1500.00"));
         when(repository.findByPublicId(existing.getPublicId()))
-                .thenReturn(Optional.of(existing), Optional.of(reloaded));
+                .thenReturn(Optional.of(existing));
         UpdateVehicleRequest request = new UpdateVehicleRequest(existing.getPublicId(),
                 Vehicle.VehicleType.TRUCK, 2L, new BigDecimal("1500"));
 
@@ -41,13 +36,12 @@ class VehicleServiceTests {
         var order = inOrder(repository);
         order.verify(repository).findByPublicId(existing.getPublicId());
         order.verify(repository).save(existing);
-        order.verify(repository).findByPublicId(existing.getPublicId());
         assertEquals(42L, existing.getId());
         assertEquals(request.type(), existing.getType());
         assertEquals(request.passengerCapacity(), existing.getPassengerCapacity());
         assertEquals(request.cargoWeightLimit(), existing.getCargoWeightLimit());
-        assertEquals(new VehicleDTO(reloaded.getType(), reloaded.getPublicId(),
-                reloaded.getPassengerCapacity(), reloaded.getCargoWeightLimit()), response);
+        assertEquals(new VehicleDTO(request.type(), request.publicId(),
+                request.passengerCapacity(), request.cargoWeightLimit()), response);
     }
 
     @Test
