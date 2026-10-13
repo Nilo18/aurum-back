@@ -3,10 +3,11 @@ INSERT INTO event (
     guest_count, location, notes, status
 )
 SELECT
-    (SELECT id FROM client ORDER BY id LIMIT 1),
-    event_type, event_date, total_cost,
-    guest_count, location, notes, status
-FROM (VALUES
+    c.id,
+    s.event_type, s.event_date, s.total_cost,
+    s.guest_count, s.location, s.notes, s.status
+FROM (SELECT id FROM client ORDER BY id LIMIT 1) AS c
+CROSS JOIN (VALUES
     ('WEDDING', DATE '2026-10-03', 18000.00, 150,
      'AURUM_BANQUET_HALL', 'Classic wedding with floral decorations.', 'CONFIRMED'),
 
@@ -96,7 +97,7 @@ FROM (VALUES
 
     ('OTHER', DATE '2026-11-28', 5500.00, 80,
      'AURUM_CONFERENCE_HALL', 'Networking evening with buffet and drinks.', 'REQUESTED')
-) AS sample_events (
+) AS s (
     event_type, event_date, total_cost,
     guest_count, location, notes, status
 );
