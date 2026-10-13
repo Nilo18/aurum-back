@@ -1,6 +1,6 @@
 package com.aurum.main.repository;
 
-import com.aurum.main.dto.ProductDTO;
+import com.aurum.main.dto.ProductRowDTO;
 import com.aurum.main.dto.requests.ProductQuery;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.utils.DynamicSqlBuilder;
@@ -15,11 +15,11 @@ import java.util.Map;
 
 @Repository
 @Data
-public class ProductRepositoryCustomImpl implements SearchStrategy<ProductDTO, ProductQuery> {
+public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO, ProductQuery> {
     private final JdbcClient jdbcClient;
 
     @Override
-    public PageResponse<ProductDTO> search(ProductQuery query) {
+    public PageResponse<ProductRowDTO> search(ProductQuery query) {
         DynamicSqlBuilder builder = new DynamicSqlBuilder(
                 """
                 SELECT
@@ -27,9 +27,10 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductDTO, P
                     p.product_name,
                     p.category,
                     p.price,
-                    p.supplier_id,
+                    s.name AS supplier_name,
                     p.quantity
                 FROM product p
+                JOIN supplier s ON s.id = p.supplier_id
                 WHERE 1 = 1
                 """,
                 "SELECT COUNT(*) FROM product p WHERE 1 = 1"
@@ -111,9 +112,9 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductDTO, P
                 .query(Long.class)
                 .single();
 
-        List<ProductDTO> content = jdbcClient.sql(finalSql)
+        List<ProductRowDTO> content = jdbcClient.sql(finalSql)
                 .params(params)
-                .query(ProductDTO.class)
+                .query(ProductRowDTO.class)
                 .list();
 
         return new PageResponse<>(content, pageNumber, pageSize, totalElements);

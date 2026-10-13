@@ -1,6 +1,7 @@
 package com.aurum.main.service;
 
 import com.aurum.main.dto.ProductDTO;
+import com.aurum.main.dto.ProductRowDTO;
 import com.aurum.main.dto.requests.CreateProductRequest;
 import com.aurum.main.dto.requests.ProductQuery;
 import com.aurum.main.dto.requests.UpdateProductRequest;
@@ -24,9 +25,9 @@ import java.util.UUID;
 public class ProductService {
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
-    private final SearchStrategy<ProductDTO, ProductQuery> searchStrategy;
+    private final SearchStrategy<ProductRowDTO, ProductQuery> searchStrategy;
 
-    public PageResponse<ProductDTO> getProducts(ProductQuery query) {
+    public PageResponse<ProductRowDTO> getProducts(ProductQuery query) {
         Long supplierId = query.getSupplierId();
 
         if (supplierId != null && !supplierRepository.existsById(supplierId)) {
