@@ -1,6 +1,8 @@
 package com.aurum.main.repository;
 
 import com.aurum.main.dto.ProductRowDTO;
+import com.aurum.main.dto.ProductSectionSupplierDTO;
+import com.aurum.main.model.Product;
 import com.aurum.main.dto.requests.ProductQuery;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.utils.DynamicSqlBuilder;
@@ -27,6 +29,7 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
                     p.product_name,
                     p.category,
                     p.price,
+                    p.supplier_id,
                     s.name AS supplier_name,
                     p.quantity
                 FROM product p
@@ -114,7 +117,17 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
 
         List<ProductRowDTO> content = jdbcClient.sql(finalSql)
                 .params(params)
-                .query(ProductRowDTO.class)
+                .query((rs, rowNum) -> new ProductRowDTO(
+                        rs.getString("public_id"),
+                        rs.getString("product_name"),
+                        Product.ProductCategory.valueOf(rs.getString("category")),
+                        rs.getBigDecimal("price"),
+                        new ProductSectionSupplierDTO(
+                                rs.getLong("supplier_id"),
+                                rs.getString("supplier_name")
+                        ),
+                        rs.getInt("quantity")
+                ))
                 .list();
 
         return new PageResponse<>(content, pageNumber, pageSize, totalElements);

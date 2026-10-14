@@ -15,5 +15,8 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     @Modifying
     @Query("DELETE FROM product p WHERE p.id = :id")
     int deleteByIdReturningInt(@Param("id") Long id);
+    @Modifying
+    @Query("DELETE FROM product p WHERE p.public_id = :publicId")
+    int deleteByPublicIdReturningInt(@Param("publicId") String publicId);
     Optional<Product> findByPublicId(String publicId);
 }

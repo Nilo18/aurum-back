@@ -87,8 +87,8 @@ public class ProductService {
         );
     }
 
-    public GenericResponse deleteProduct(Long id) {
-        int deleted = productRepository.deleteByIdReturningInt(id);
+    public GenericResponse deleteProduct(String publicId) {
+        int deleted = productRepository.deleteByPublicIdReturningInt(publicId);
 
         if (deleted == 0) {
             throw new ProductNotFoundException("Product not found");
