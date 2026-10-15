@@ -28,9 +28,9 @@ public class ProductService {
     private final SearchStrategy<ProductRowDTO, ProductQuery> searchStrategy;
 
     public PageResponse<ProductRowDTO> getProducts(ProductQuery query) {
-        Long supplierId = query.getSupplierId();
+        String supplierPublicId = query.getSupplierPublicId();
 
-        if (supplierId != null && !supplierRepository.existsById(supplierId)) {
+        if (supplierPublicId != null && !supplierRepository.existsByPublicId(supplierPublicId)) {
             throw new SupplierNotFoundException("Supplier not found");
         }
 
@@ -38,9 +38,8 @@ public class ProductService {
     }
 
     public ProductDTO addProduct(CreateProductRequest request) {
-        if (!supplierRepository.existsById(request.supplierId())) {
-            throw new SupplierNotFoundException("Supplier not found");
-        }
+        Supplier supplier = supplierRepository.findByPublicId(request.supplierPublicId())
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier not found"));
 
         if (productRepository.existsByProductName(request.productName())) {
             throw new ProductAlreadyExistsException("Product already exists");
@@ -49,7 +48,7 @@ public class ProductService {
         Product product = new Product();
         product.setProductName(request.productName());
         product.setCategory(request.category());
-        product.setSupplierId(request.supplierId());
+        product.setSupplierId(supplier.getId());
         product.setQuantity(request.quantity());
         product.setPrice(request.price());
         String publicId = UUID.randomUUID().toString();
@@ -61,7 +60,7 @@ public class ProductService {
                 product.getProductName(),
                 product.getCategory(),
                 product.getPrice(),
-                product.getSupplierId(),
+                supplier.getPublicId(),
                 product.getQuantity()
         );
     }
@@ -69,10 +68,12 @@ public class ProductService {
     public ProductDTO updateProduct(UpdateProductRequest request) {
         Product product = productRepository.findByPublicId(request.publicId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+        Supplier supplier = supplierRepository.findByPublicId(request.supplierPublicId())
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier not found"));
 
         product.setProductName(request.productName());
         product.setCategory(request.category());
-        product.setSupplierId(request.supplierId());
+        product.setSupplierId(supplier.getId());
         product.setQuantity(request.quantity());
         product.setPrice(request.price());
         product = productRepository.save(product);
@@ -82,7 +83,7 @@ public class ProductService {
                 product.getProductName(),
                 product.getCategory(),
                 product.getPrice(),
-                product.getSupplierId(),
+                supplier.getPublicId(),
                 product.getQuantity()
         );
     }

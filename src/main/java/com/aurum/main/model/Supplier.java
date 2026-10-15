@@ -9,6 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Supplier {
     @Id
     private Long id;
+    private String publicId;
     private String name;
     private String productType;
     private String city;

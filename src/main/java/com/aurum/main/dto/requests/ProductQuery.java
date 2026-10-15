@@ -12,7 +12,7 @@ public class ProductQuery {
     private Product.ProductCategory productCategory;
     private BigDecimal priceFrom;
     private BigDecimal priceTo;
-    private Long supplierId;
+    private String supplierPublicId;
     private Integer quantityFrom;
     private Integer quantityTo;
     private String sortBy = "";

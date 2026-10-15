@@ -34,7 +34,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEvents(query));
     }
 
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteEvent(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.deleteEvent(id));
     }

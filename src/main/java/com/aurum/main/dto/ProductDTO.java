@@ -9,7 +9,7 @@ public record ProductDTO(
         String productName,
         Product.ProductCategory category,
         BigDecimal price,
-        Long supplierId,
+        String supplierPublicId,
         Integer quantity
 ) {
 }

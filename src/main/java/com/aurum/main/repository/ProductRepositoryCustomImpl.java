@@ -29,14 +29,14 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
                     p.product_name,
                     p.category,
                     p.price,
-                    p.supplier_id,
+                    s.public_id AS supplier_public_id,
                     s.name AS supplier_name,
                     p.quantity
                 FROM product p
                 JOIN supplier s ON s.id = p.supplier_id
                 WHERE 1 = 1
                 """,
-                "SELECT COUNT(*) FROM product p WHERE 1 = 1"
+                "SELECT COUNT(*) FROM product p JOIN supplier s ON s.id = p.supplier_id WHERE 1 = 1"
         );
 
         builder
@@ -62,9 +62,9 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
                         "priceTo", query.getPriceTo()
                 )
                 .addCondition(
-                        query.getSupplierId() != null,
-                        " AND p.supplier_id = :supplierId ",
-                        "supplierId", query.getSupplierId()
+                        query.getSupplierPublicId() != null,
+                        " AND s.public_id = :supplierPublicId ",
+                        "supplierPublicId", query.getSupplierPublicId()
                 )
                 .addCondition(
                         query.getQuantityFrom() != null,
@@ -88,8 +88,8 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
             cleanSortBy = "p.category";
         } else if ("price".equalsIgnoreCase(query.getSortBy())) {
             cleanSortBy = "p.price";
-        } else if ("supplierId".equalsIgnoreCase(query.getSortBy())) {
-            cleanSortBy = "p.supplier_id";
+        } else if ("supplierPublicId".equalsIgnoreCase(query.getSortBy())) {
+            cleanSortBy = "s.public_id";
         } else if ("quantity".equalsIgnoreCase(query.getSortBy())) {
             cleanSortBy = "p.quantity";
         } else if ("publicId".equalsIgnoreCase(query.getSortBy())) {
@@ -123,7 +123,7 @@ public class ProductRepositoryCustomImpl implements SearchStrategy<ProductRowDTO
                         Product.ProductCategory.valueOf(rs.getString("category")),
                         rs.getBigDecimal("price"),
                         new ProductSectionSupplierDTO(
-                                rs.getLong("supplier_id"),
+                                rs.getString("supplier_public_id"),
                                 rs.getString("supplier_name")
                         ),
                         rs.getInt("quantity")
