@@ -1,0 +1,1 @@
+ALTER TABLE supplier DROP COLUMN product_type

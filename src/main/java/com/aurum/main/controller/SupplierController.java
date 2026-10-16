@@ -2,17 +2,18 @@ package com.aurum.main.controller;
 
 import com.aurum.main.dto.ProductSectionSupplierDTO;
 import com.aurum.main.dto.SupplierDTO;
+import com.aurum.main.dto.requests.CreateSupplierRequest;
 import com.aurum.main.dto.requests.SupplierQuery;
 import com.aurum.main.dto.responses.PageResponse;
+import com.aurum.main.model.Product;
 import com.aurum.main.service.SupplierService;
+import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Data
@@ -28,5 +29,15 @@ public class SupplierController {
     @GetMapping(path = "/names")
     public ResponseEntity<List<ProductSectionSupplierDTO>> getSupplierNames() {
         return ResponseEntity.ok(supplierService.getSupplierNames());
+    }
+
+    @GetMapping(path = "/available-categories")
+    public ResponseEntity<Set<Product.ProductCategory>> getAvailableProductCategories() {
+        return ResponseEntity.ok(supplierService.getAvailableProductCategories());
+    }
+
+    @PostMapping
+    public ResponseEntity<SupplierDTO> addSupplier(@Valid @RequestBody CreateSupplierRequest request) {
+        return ResponseEntity.ok(supplierService.addSupplier(request));
     }
 }

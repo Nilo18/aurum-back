@@ -11,7 +11,7 @@ public class Supplier {
     private Long id;
     private String publicId;
     private String name;
-    private Product.ProductCategory productType;
+//    private Product.ProductCategory productType;
     private String city;
     private String street;
     private String number;
