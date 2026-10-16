@@ -11,6 +11,7 @@ import com.aurum.main.exception.BadRequestException;
 import com.aurum.main.exception.SupplierNotFoundException;
 import com.aurum.main.model.Product;
 import com.aurum.main.model.Supplier;
+import com.aurum.main.repository.ProductRepository;
 import com.aurum.main.repository.SearchStrategy;
 import com.aurum.main.repository.SupplierCategoryRepository;
 import com.aurum.main.repository.SupplierRepository;
@@ -22,6 +23,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Data
@@ -29,6 +31,7 @@ public class SupplierService {
     private final SearchStrategy<SupplierDTO, SupplierQuery> searchStrategy;
     private final SupplierRepository supplierRepository;
     private final SupplierCategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     public PageResponse<SupplierDTO> getSuppliers(SupplierQuery query) {
         return searchStrategy.search(query);
@@ -47,6 +50,13 @@ public class SupplierService {
         supplier = supplierRepository.save(supplier);
 
         categoryRepository.saveAll(supplier.getId(), supplier.getPublicId(), request.categories());
+
+        productRepository.assignUnassignedProducts(
+                supplier.getId(),
+                request.categories().stream()
+                        .map(Enum::name)
+                        .collect(Collectors.toSet())
+        );
 
         return new SupplierDTO(
                 supplier.getPublicId(),
