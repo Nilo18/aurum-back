@@ -4,6 +4,7 @@ import com.aurum.main.dto.ProductSectionSupplierDTO;
 import com.aurum.main.dto.SupplierDTO;
 import com.aurum.main.dto.requests.CreateSupplierRequest;
 import com.aurum.main.dto.requests.SupplierQuery;
+import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.model.Product;
 import com.aurum.main.service.SupplierService;
@@ -39,5 +40,10 @@ public class SupplierController {
     @PostMapping
     public ResponseEntity<SupplierDTO> addSupplier(@Valid @RequestBody CreateSupplierRequest request) {
         return ResponseEntity.ok(supplierService.addSupplier(request));
+    }
+
+    @DeleteMapping(path = "/{publicId}")
+    public ResponseEntity<GenericResponse> deleteSupplier(@PathVariable String publicId) {
+        return ResponseEntity.ok(supplierService.deleteSupplier(publicId));
     }
 }

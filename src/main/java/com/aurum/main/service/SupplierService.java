@@ -8,6 +8,7 @@ import com.aurum.main.dto.requests.SupplierQuery;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.BadRequestException;
+import com.aurum.main.exception.SupplierNotFoundException;
 import com.aurum.main.model.Product;
 import com.aurum.main.model.Supplier;
 import com.aurum.main.repository.SearchStrategy;
@@ -57,6 +58,16 @@ public class SupplierService {
         );
     }
 
+    public GenericResponse deleteSupplier(String publicId) {
+        int deleted = supplierRepository.deleteByPublicId(publicId);
+
+        if (deleted == 0) {
+            throw new SupplierNotFoundException("Supplier not found");
+        }
+
+        return new GenericResponse(200, "Supplier deleted successfully");
+    }
+
     public Set<Product.ProductCategory> getAvailableProductCategories() {
         Set<Product.ProductCategory> assigned =
                 categoryRepository.findAssignedCategories();
@@ -71,9 +82,5 @@ public class SupplierService {
 
     public List<ProductSectionSupplierDTO> getSupplierNames() {
         return supplierRepository.findAllSupplierNames();
-    }
-
-    public GenericResponse deleteSupplier() {
-        return new GenericResponse(200, "Supplier deleted successfully");
     }
 }
