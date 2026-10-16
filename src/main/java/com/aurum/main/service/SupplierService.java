@@ -5,6 +5,7 @@ import com.aurum.main.dto.SupplierCategoryDTO;
 import com.aurum.main.dto.SupplierDTO;
 import com.aurum.main.dto.requests.CreateSupplierRequest;
 import com.aurum.main.dto.requests.SupplierQuery;
+import com.aurum.main.dto.requests.UpdateSupplierRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.BadRequestException;
@@ -65,6 +66,33 @@ public class SupplierService {
                 supplier.getCity(),
                 supplier.getStreet(),
                 supplier.getNumber()
+        );
+    }
+
+    @Transactional
+    public SupplierDTO updateSupplier(UpdateSupplierRequest request) {
+        Supplier supplier = supplierRepository.findByPublicId(request.publicId())
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier not found"));
+        supplier.setName(request.name());
+        supplier.setCity(request.city());
+        supplier.setStreet(request.street());
+        supplier.setNumber(request.number());
+        supplier = supplierRepository.save(supplier);
+
+        Set<String> categories = request.categories().stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
+        productRepository.unassignProductsOutsideCategories(supplier.getId(), categories);
+
+        categoryRepository.deleteBySupplierId(supplier.getId());
+
+        categoryRepository.saveAll(supplier.getId(), supplier.getPublicId(), request.categories());
+        productRepository.assignUnassignedProducts(supplier.getId(), categories);
+
+        return new SupplierDTO(
+                supplier.getPublicId(), supplier.getName(), request.categories(),
+                supplier.getCity(), supplier.getStreet(), supplier.getNumber()
         );
     }
 

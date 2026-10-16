@@ -28,4 +28,14 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     AND category IN (:categories);
     """)
     int assignUnassignedProducts(@Param("supplierId") Long supplierId, @Param("categories") Set<String> categories);
+
+    @Modifying
+    @Query("""
+            UPDATE product
+            SET supplier_id = NULL
+            WHERE supplier_id = :supplierId
+              AND category NOT IN (:categories)
+            """)
+    int unassignProductsOutsideCategories(@Param("supplierId") Long supplierId,
+                                         @Param("categories") Set<String> categories);
 }

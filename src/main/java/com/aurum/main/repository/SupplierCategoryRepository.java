@@ -32,6 +32,12 @@ public class SupplierCategoryRepository {
                 .set();
     }
 
+    public int deleteBySupplierId(Long supplierId) {
+        return jdbcClient.sql("DELETE FROM supplier_categories WHERE supplier_id = :supplierId")
+                .param("supplierId", supplierId)
+                .update();
+    }
+
     public Set<SupplierCategoryDTO> saveAll(Long supplierId, String supplierPublicId, Set<Product.ProductCategory> categories) {
         List<SqlParameterSource> batch = new ArrayList<>(categories.size());
         Set<SupplierCategoryDTO> result = new HashSet<>();
