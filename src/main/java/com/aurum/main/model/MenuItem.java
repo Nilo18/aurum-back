@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 public class MenuItem {
     @Id
     private Long id;
+    private String publicId;
     private String name;
     private MenuItemCategory category;
     private BigDecimal pricePerPerson;
