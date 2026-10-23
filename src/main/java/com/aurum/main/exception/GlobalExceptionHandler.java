@@ -130,6 +130,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(MenuItemNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleMenuItemNotFound(MenuItemNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex) {

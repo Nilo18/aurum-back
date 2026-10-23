@@ -2,6 +2,7 @@ package com.aurum.main.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
@@ -14,6 +15,8 @@ public class MenuItem {
     private String publicId;
     private String name;
     private MenuItemCategory category;
+    @Column("cuisine_type")
+    private CuisineType type;
     private BigDecimal pricePerPerson;
 
     public enum MenuItemCategory {
