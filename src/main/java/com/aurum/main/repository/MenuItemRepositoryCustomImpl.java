@@ -7,8 +7,10 @@ import com.aurum.main.utils.DynamicSqlBuilder;
 import lombok.Data;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Repository
@@ -33,6 +35,12 @@ public class MenuItemRepositoryCustomImpl implements SearchStrategy<MenuItemDTO,
         );
 
         builder
+                .addCondition(
+                        StringUtils.hasText(query.getSearch()),
+                        " AND LOWER(m.name) LIKE :search ",
+                        "search", query.getSearch() != null
+                                ? "%" + query.getSearch().toLowerCase(Locale.ROOT) + "%" : null
+                )
                 .addCondition(
                         query.getCategory() != null,
                         " AND m.category = :category ",

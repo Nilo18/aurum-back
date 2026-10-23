@@ -14,6 +14,7 @@ public class MenuItemQuery {
     private MenuItem.CuisineType type;
     private BigDecimal priceFrom;
     private BigDecimal priceTo;
+    private String search = "";
     private String sortBy = "";
     private String sortDirection = "";
 }
