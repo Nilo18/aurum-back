@@ -2,7 +2,7 @@ package com.aurum.main.controller;
 
 import com.aurum.main.dto.ProductSectionSupplierDTO;
 import com.aurum.main.dto.SupplierDTO;
-import com.aurum.main.dto.requests.CreateSupplierRequest;
+import com.aurum.main.dto.requests. CreateSupplierRequest;
 import com.aurum.main.dto.requests.SupplierQuery;
 import com.aurum.main.dto.requests.UpdateSupplierRequest;
 import com.aurum.main.dto.responses.GenericResponse;

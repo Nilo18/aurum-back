@@ -15,7 +15,7 @@ public record CreateSupplierRequest(
         @Size(max = 50)
         String name,
 
-        @NotBlank
+        @NotBlank   
         @Size(max = 100)
         String city,
 
