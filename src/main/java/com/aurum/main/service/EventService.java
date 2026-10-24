@@ -4,6 +4,7 @@ import com.aurum.main.dto.EventDTO;
 import com.aurum.main.dto.requests.EmailRequest;
 import com.aurum.main.dto.requests.EventOrderRequest;
 import com.aurum.main.dto.requests.EventQuery;
+import com.aurum.main.dto.requests.UpdateEventRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
@@ -85,6 +86,10 @@ public class EventService {
         otpService.invalidateOtp(request.transactionKey());
 
         return new GenericResponse(200, "Event added successfully!");
+    }
+
+    public EventDTO updateEvent(UpdateEventRequest request) {
+        return null;
     }
 
     public PageResponse<EventDTO> getEvents(EventQuery query) {
