@@ -15,7 +15,7 @@ public record EventOrderRequest(
         @NotNull(message = "Event info is required")
         EventCreationRequest event,
         @NotNull(message = "Dishes from the menu must be selected")
-        List<Long> menuItemIds,
+        List<String> menuItemPublicIds,
         @NotBlank(message = "Transaction key is required")
         String transactionKey,
         @NotBlank(message = "Otp is required")

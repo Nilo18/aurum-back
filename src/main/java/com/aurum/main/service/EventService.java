@@ -9,6 +9,7 @@ import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.EventNotFoundException;
 import com.aurum.main.exception.InvalidOtpException;
+import com.aurum.main.exception.MenuItemNotFoundException;
 import com.aurum.main.model.Client;
 import com.aurum.main.model.Event;
 import com.aurum.main.model.MenuItem;
@@ -69,8 +70,8 @@ public class EventService {
         event.setClientId(client.getId());
         event.setEventType(request.event().eventType());
         event.setDate(request.event().date());
-        List<Long> menuItemIds = request.menuItemIds();
-        List<MenuItem> menuItems = menuItemRepository.findAllById(menuItemIds);
+        List<String> menuItemPublicIds = request.menuItemPublicIds();
+        List<MenuItem> menuItems = menuItemRepository.findAllByPublicIdIn(menuItemPublicIds);
         BigDecimal totalCost = menuItems.stream().map(
                 item -> item.getPricePerPerson().multiply(
                         BigDecimal.valueOf(request.event().guestCount()
