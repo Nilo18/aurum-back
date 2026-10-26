@@ -25,7 +25,7 @@ public class EventRepositoryCustomImpl implements SearchStrategy<EventDTO, Event
         DynamicSqlBuilder builder = new DynamicSqlBuilder(
                 """
                 SELECT\s
-                    e.id,\s
+                    e.public_id,\s
                     e.event_type,\s
                     e.total_cost,\s
                     e.guest_count,

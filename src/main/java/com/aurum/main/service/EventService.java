@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Data
@@ -89,7 +90,30 @@ public class EventService {
     }
 
     public EventDTO updateEvent(UpdateEventRequest request) {
-        return null;
+        Event event = eventRepository.findByPublicId(request.publicId())
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+        String publicId = UUID.randomUUID().toString();
+        event.setPublicId(publicId);
+        event.setEventType(request.eventType());
+        event.setDate(request.date());
+        event.setTotalCost(request.totalCost());
+        event.setGuestCount(request.guestCount());
+        event.setLocation(request.location());
+        event.setStatus(request.status());
+        event = eventRepository.save(event);
+
+        String clientName = clientRepository.findNameById(event.getClientId());
+
+        return new EventDTO(
+                event.getPublicId(),
+                clientName,
+                event.getEventType(),
+                event.getDate(),
+                event.getTotalCost(),
+                event.getGuestCount(),
+                event.getLocation(),
+                event.getStatus()
+        );
     }
 
     public PageResponse<EventDTO> getEvents(EventQuery query) {

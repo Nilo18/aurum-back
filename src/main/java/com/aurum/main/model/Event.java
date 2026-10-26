@@ -15,6 +15,7 @@ public class Event {
 
     private Long clientId;
 
+    private String publicId;
     private EventType eventType;
     private LocalDate date;
     private BigDecimal totalCost;

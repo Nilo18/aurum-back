@@ -4,6 +4,7 @@ import com.aurum.main.dto.EventDTO;
 import com.aurum.main.dto.requests.EmailRequest;
 import com.aurum.main.dto.requests.EventOrderRequest;
 import com.aurum.main.dto.requests.EventQuery;
+import com.aurum.main.dto.requests.UpdateEventRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
@@ -27,6 +28,11 @@ public class EventController {
     @PostMapping
     public ResponseEntity<GenericResponse> createEvent(@Valid @RequestBody EventOrderRequest request) {
         return ResponseEntity.ok(eventService.createEvent(request));
+    }
+
+    @PutMapping
+    public ResponseEntity<EventDTO> updateEvent(@Valid @RequestBody UpdateEventRequest request) {
+        return ResponseEntity.ok(eventService.updateEvent(request));
     }
 
     @GetMapping

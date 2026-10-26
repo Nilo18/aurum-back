@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record EventDTO(
-        Long id,
+        String publicId,
         String clientName,
         Event.EventType eventType,
         LocalDate date,

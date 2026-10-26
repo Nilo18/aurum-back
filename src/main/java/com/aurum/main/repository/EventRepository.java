@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends CrudRepository<Event, Long> {
     @Query("SELECT COUNT(*) FROM event WHERE status IN ('REQUESTED', 'PLANNING')")
@@ -18,6 +19,7 @@ public interface EventRepository extends CrudRepository<Event, Long> {
     WHERE e.status IN ('REQUESTED', 'PLANNING')
     """)
     List<DashboardEventDTO> findByStatusInReview();
+    Optional<Event> findByPublicId(String publicId);
     @Query("""
     SELECT SUM(e.total_cost) FROM event e WHERE e.status NOT IN ('CANCELLED', 'REJECTED')""")
     BigDecimal sumTotalValue();
