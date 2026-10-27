@@ -175,6 +175,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(EventHasBeenCompletedException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyCompletedEvent(EventHasBeenCompletedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<Map<String, String>> handleDuplicateKey(
             DuplicateKeyException exception

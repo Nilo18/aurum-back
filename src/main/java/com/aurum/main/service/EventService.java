@@ -8,11 +8,10 @@ import com.aurum.main.dto.requests.UpdateEventRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
-import com.aurum.main.exception.EventNotFoundException;
-import com.aurum.main.exception.InvalidOtpException;
-import com.aurum.main.exception.MenuItemNotFoundException;
+import com.aurum.main.exception.*;
 import com.aurum.main.model.Client;
 import com.aurum.main.model.Event;
+import com.aurum.main.model.FeedbackInvitation;
 import com.aurum.main.model.MenuItem;
 import com.aurum.main.repository.*;
 import lombok.Data;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +33,7 @@ public class EventService {
     private final MenuItemRepository menuItemRepository;
     private final MailService mailService;
     private final OtpService otpService;
+    private final FeedbackInvitationRepository feedbackInvitationRepository;
 
     public OtpResponse verifyCreateEventRequest(EmailRequest request) {
         OtpResponse otpResponse = otpService.generateOtp();
@@ -92,6 +93,16 @@ public class EventService {
     public EventDTO updateEvent(UpdateEventRequest request) {
         Event event = eventRepository.findByPublicId(request.publicId())
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+//        if (event.getStatus() == Event.EventStatus.COMPLETED
+//                || event.getStatus() == Event.EventStatus.CANCELLED
+//                || event.getStatus() == Event.EventStatus.REJECTED) {
+//
+//            throw new EventHasBeenCompletedException(
+//                    "Completed, cancelled, or rejected events cannot be modified"
+//            );
+//        }
+
         String publicId = UUID.randomUUID().toString();
         event.setPublicId(publicId);
         event.setEventType(request.eventType());
@@ -102,11 +113,35 @@ public class EventService {
         event.setStatus(request.status());
         event = eventRepository.save(event);
 
-        String clientName = clientRepository.findNameById(event.getClientId());
+        Client client = clientRepository.findById(event.getClientId())
+                .orElseThrow(() -> new ClientNotFoundException("Client not found"));
+
+        if (request.status() == Event.EventStatus.COMPLETED) {
+            String token = UUID.randomUUID().toString();
+            FeedbackInvitation feedbackInvitation = new FeedbackInvitation();
+            feedbackInvitation.setEventId(event.getId());
+            feedbackInvitation.setTokenHash(token);
+            feedbackInvitation.setExpiresAt(LocalDateTime.now().plusDays(7));
+            feedbackInvitation.setUsedAt(null);
+            feedbackInvitationRepository.save(feedbackInvitation);
+
+            String link = "http://localhost:4200/feedback?token=" + token;
+
+            mailService.formatAndSend(
+                    "nikalongurashvili@gmail.com",
+                    client.getEmail(),
+                    "Feedback Request",
+                    """
+                            Hello, we're glad to notify you that your event has been completed,
+                            hope you had an amazing time, could you please now leave a feedback of your
+                            experience?\s
+                           \s""" + link
+            );
+        }
 
         return new EventDTO(
                 event.getPublicId(),
-                clientName,
+                client.getName(),
                 event.getEventType(),
                 event.getDate(),
                 event.getTotalCost(),
