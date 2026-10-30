@@ -1,6 +1,5 @@
 package com.aurum.main.service;
 
-import com.resend.Resend;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,25 +9,28 @@ import static org.mockito.Mockito.mock;
 
 class MailStrategyWiringTests {
     @Test void localProfileInjectsSmtpThroughStrategy() {
-        assertProfile("local", SmtpMailService.class);
+        assertProfile("local");
     }
 
-    @Test void productionProfileInjectsResendThroughStrategy() {
-        assertProfile("production", ResendMailService.class);
+    @Test void productionProfileInjectsSmtpThroughStrategy() {
+        assertProfile("production");
     }
 
-    private void assertProfile(String profile, Class<? extends MailStrategy> implementation) {
+    @Test void defaultProfileInjectsSmtpThroughStrategy() {
+        assertProfile();
+    }
+
+    private void assertProfile(String... profiles) {
         try (var context = new AnnotationConfigApplicationContext()) {
-            context.getEnvironment().setActiveProfiles(profile);
+            context.getEnvironment().setActiveProfiles(profiles);
             context.registerBean(JavaMailSender.class, () -> mock(JavaMailSender.class));
-            context.registerBean(Resend.class, () -> mock(Resend.class));
             context.registerBean(OtpService.class, () -> mock(OtpService.class));
-            context.register(SmtpMailService.class, ResendMailService.class, HomeService.class);
+            context.register(SmtpMailService.class, HomeService.class);
             context.refresh();
 
             assertEquals(1, context.getBeansOfType(MailStrategy.class).size());
             var strategy = context.getBean(MailStrategy.class);
-            assertInstanceOf(implementation, strategy);
+            assertInstanceOf(SmtpMailService.class, strategy);
             assertSame(strategy, context.getBean(HomeService.class).getMailStrategy());
         }
     }

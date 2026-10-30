@@ -253,7 +253,7 @@ Create a Render **Web Service** from this repository and select **Docker**. Use 
 
 The multi-stage image builds with Java 25 and Maven, then runs the packaged application as an unprivileged user on a Java 25 runtime. Tests are skipped during the image build; run `mvn verify` in CI before deploying.
 
-The image defaults to the `production` profile and listens on `0.0.0.0` using Render's `PORT` environment variable, or port `10000` locally. No separate start command is needed.
+The image defaults to the `production` profile and listens on `0.0.0.0` using Render's `PORT` environment variable, or port `8080` locally. No separate start command is needed.
 
 Configure these variables in the Render dashboard:
 
@@ -265,10 +265,14 @@ Configure these variables in the Render dashboard:
 | `SPRING_DATASOURCE_PASSWORD` | Database password |
 | `JWT_SECRET` | Base64-encoded random signing key, at least 32 decoded bytes |
 | `JWT_EXPIRATION_MS` | `43200000` |
-| `RESEND_API_KEY` | Resend API key |
-| `SPRING_MAIL_USERNAME` | Owner/sender email required by employee invitations |
+| `SPRING_MAIL_HOST` | SMTP host, such as `smtp.gmail.com` |
+| `SPRING_MAIL_PORT` | SMTP port, such as `587` |
+| `SPRING_MAIL_USERNAME` | SMTP username / owner email |
+| `SPRING_MAIL_PASSWORD` | SMTP password or Gmail app password |
+| `SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH` | `true` for authenticated SMTP |
+| `SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE` | `true` for STARTTLS on port 587 |
 
-Production mail uses the Resend API, so SMTP host, port, and password are not required. Sender addresses passed by the services must be authorized by your Resend configuration.
+SMTP is used in every profile through `MailStrategy`. Your hosting provider must allow outbound connections to the configured SMTP port. Render free services block ports 25, 465, and 587, so this SMTP setup requires another suitable host or plan.
 
 The Docker build context excludes the local `application.properties`, `.env` files, and common private-key files. Supply runtime configuration through Render environment variables.
 
@@ -276,7 +280,7 @@ To build and run locally with Docker:
 
 ```bash
 docker build -t aurum-backend .
-docker run --rm -p 10000:10000 --env-file .env aurum-backend
+docker run --rm -p 8080:8080 --env-file .env aurum-backend
 ```
 
 Create the `.env` file locally with the runtime variables above; do not commit it. The Docker command explicitly loads it at runtime.
