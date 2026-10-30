@@ -2,8 +2,10 @@ package com.aurum.main.controller;
 
 import com.aurum.main.dto.FeedbackDTO;
 import com.aurum.main.dto.requests.CreateFeedbackRequest;
+import com.aurum.main.dto.requests.FeedbackQuery;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.responses.GenericResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -25,5 +27,10 @@ public class FeedbackController {
     @PostMapping
     public ResponseEntity<FeedbackDTO> createFeedback(@Valid @RequestBody CreateFeedbackRequest request) {
         return ResponseEntity.ok(feedbackService.createFeedback(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<FeedbackDTO>> getAllFeedback(@Valid @ModelAttribute FeedbackQuery query) {
+        return ResponseEntity.ok(feedbackService.getAllFeedback(query));
     }
 }

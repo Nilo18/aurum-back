@@ -2,14 +2,17 @@ package com.aurum.main.service;
 
 import com.aurum.main.dto.FeedbackDTO;
 import com.aurum.main.dto.requests.CreateFeedbackRequest;
+import com.aurum.main.dto.requests.FeedbackQuery;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.responses.GenericResponse;
+import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.*;
 import com.aurum.main.model.Feedback;
 import com.aurum.main.model.FeedbackInvitation;
 import com.aurum.main.model.Invitation;
 import com.aurum.main.repository.FeedbackInvitationRepository;
 import com.aurum.main.repository.FeedbackRepository;
+import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class FeedbackService {
     private final FeedbackInvitationRepository feedbackInvitationRepository;
     private final FeedbackRepository feedbackRepository;
+    private final SearchStrategy<FeedbackDTO, FeedbackQuery> searchStrategy;
 
     public GenericResponse validateFeedbackInvitation(InvitationTokenRequest request) {
         FeedbackInvitation suggestedInvitation = feedbackInvitationRepository.findByTokenHash(request.token())
@@ -77,5 +81,9 @@ public class FeedbackService {
                 feedback.getRating(),
                 feedback.getDescription()
         );
+    }
+
+    public PageResponse<FeedbackDTO> getAllFeedback(FeedbackQuery query) {
+        return searchStrategy.search(query);
     }
 }
