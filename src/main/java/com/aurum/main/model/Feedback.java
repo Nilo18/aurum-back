@@ -10,12 +10,14 @@ import java.time.LocalDate;
 @Table("feedback")
 public class Feedback {
     @Id
-    @Embedded.Nullable
-    private Key id;
+    private Long id;
+
+    private Long eventId;
+    private String publicId;
     private String author;
     private LocalDate commentDate;
     private Short rating;
     private String description;
 
-    public record Key(Long eventId, Long id) {}
+//    public record Key(Long eventId, Long id) {}
 }

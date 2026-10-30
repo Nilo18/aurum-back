@@ -175,9 +175,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(EventHasBeenCompletedException.class)
-    public ResponseEntity<Map<String, String>> handleAlreadyCompletedEvent(EventHasBeenCompletedException ex) {
+    @ExceptionHandler(EventCannotBeUpdatedException.class)
+    public ResponseEntity<Map<String, String>> handleEventCannotBeUpdate(EventCannotBeUpdatedException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FeedbackInvitationAlreadyUsedException.class)
+    public ResponseEntity<Map<String, String>> handleFeedbackInvitationAlreadyUsed(FeedbackInvitationAlreadyUsedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FeedbackInvitationExpiredException.class)
+    public ResponseEntity<Map<String, String>> handleFeedbackInvitationExpired(FeedbackInvitationExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(DuplicateKeyException.class)

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -70,6 +71,8 @@ public class EventService {
         client = clientRepository.save(client);
 
         Event event = new Event();
+        String publicId = UUID.randomUUID().toString();
+        event.setPublicId(publicId);
         event.setClientId(client.getId());
         event.setEventType(request.event().eventType());
         event.setDate(request.event().date());
@@ -94,14 +97,20 @@ public class EventService {
         Event event = eventRepository.findByPublicId(request.publicId())
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
-//        if (event.getStatus() == Event.EventStatus.COMPLETED
-//                || event.getStatus() == Event.EventStatus.CANCELLED
-//                || event.getStatus() == Event.EventStatus.REJECTED) {
-//
-//            throw new EventHasBeenCompletedException(
-//                    "Completed, cancelled, or rejected events cannot be modified"
-//            );
-//        }
+        if (event.getStatus() == Event.EventStatus.COMPLETED
+                || event.getStatus() == Event.EventStatus.CANCELLED
+                || event.getStatus() == Event.EventStatus.REJECTED) {
+
+            throw new EventCannotBeUpdatedException(
+                    "Completed, cancelled, or rejected events cannot be modified"
+            );
+        }
+
+        if (request.status() == Event.EventStatus.COMPLETED && event.getDate().isAfter(LocalDate.now())) {
+            throw new EventCannotBeUpdatedException(
+                    "An event cannot be completed before its scheduled date"
+            );
+        }
 
         String publicId = UUID.randomUUID().toString();
         event.setPublicId(publicId);

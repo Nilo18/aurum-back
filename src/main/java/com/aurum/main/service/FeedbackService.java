@@ -1,10 +1,11 @@
 package com.aurum.main.service;
 
+import com.aurum.main.dto.FeedbackDTO;
+import com.aurum.main.dto.requests.CreateFeedbackRequest;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.responses.GenericResponse;
-import com.aurum.main.exception.BadInvitationRequestException;
-import com.aurum.main.exception.InvitationTokenExpiredException;
-import com.aurum.main.exception.InvitationTokenNotFoundException;
+import com.aurum.main.exception.*;
+import com.aurum.main.model.Feedback;
 import com.aurum.main.model.FeedbackInvitation;
 import com.aurum.main.model.Invitation;
 import com.aurum.main.repository.FeedbackInvitationRepository;
@@ -13,13 +14,16 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDateTime;
+import java.util.UUID;
 
 @Service
 @Data
 public class FeedbackService {
     private final FeedbackInvitationRepository feedbackInvitationRepository;
+    private final FeedbackRepository feedbackRepository;
 
     public GenericResponse validateFeedbackInvitation(InvitationTokenRequest request) {
         FeedbackInvitation suggestedInvitation = feedbackInvitationRepository.findByTokenHash(request.token())
@@ -34,5 +38,44 @@ public class FeedbackService {
         }
 
         return new GenericResponse(200, "Feedback invitation validated successfully!");
+    }
+
+    public FeedbackDTO createFeedback(CreateFeedbackRequest request) {
+        FeedbackInvitation feedbackInvitation = feedbackInvitationRepository
+                .findByTokenHash(request.tokenHash())
+                .orElseThrow(() -> new InvitationTokenNotFoundException("Feedback invitation not found"));
+
+        if (feedbackInvitation.getUsedAt() != null) {
+            throw new FeedbackInvitationAlreadyUsedException(
+                    "Feedback invitation has already been used"
+            );
+        }
+
+        if (feedbackInvitation.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new FeedbackInvitationExpiredException(
+                    "Feedback invitation has expired"
+            );
+        }
+
+        Feedback feedback = new Feedback();
+        feedback.setEventId(feedbackInvitation.getEventId());
+        String publicId = UUID.randomUUID().toString();
+        feedback.setPublicId(publicId);
+        feedback.setAuthor(request.author());
+        feedback.setCommentDate(LocalDate.now());
+        feedback.setRating(request.rating());
+        feedback.setDescription(request.description());
+        feedback = feedbackRepository.save(feedback);
+
+        feedbackInvitation.setUsedAt(LocalDateTime.now());
+        feedbackInvitationRepository.save(feedbackInvitation);
+
+        return new FeedbackDTO(
+                feedback.getPublicId(),
+                feedback.getAuthor(),
+                feedback.getCommentDate(),
+                feedback.getRating(),
+                feedback.getDescription()
+        );
     }
 }

@@ -1,6 +1,7 @@
 package com.aurum.main.dto.requests;
 
 import com.aurum.main.model.Event;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 public record EventCreationRequest(
         @NotNull(message = "Event type is required")
         Event.EventType eventType,
+        @FutureOrPresent
         @NotNull(message = "Event date is required")
         LocalDate date,
         BigDecimal totalCost,

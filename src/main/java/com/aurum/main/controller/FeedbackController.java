@@ -1,5 +1,7 @@
 package com.aurum.main.controller;
 
+import com.aurum.main.dto.FeedbackDTO;
+import com.aurum.main.dto.requests.CreateFeedbackRequest;
 import com.aurum.main.dto.requests.InvitationTokenRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.service.FeedbackService;
@@ -18,5 +20,10 @@ public class FeedbackController {
     public ResponseEntity<GenericResponse> verifyFeedbackInvitation
             (@Valid @RequestBody InvitationTokenRequest request) {
         return ResponseEntity.ok(feedbackService.validateFeedbackInvitation(request));
+    }
+
+    @PostMapping
+    public ResponseEntity<FeedbackDTO> createFeedback(@Valid @RequestBody CreateFeedbackRequest request) {
+        return ResponseEntity.ok(feedbackService.createFeedback(request));
     }
 }
