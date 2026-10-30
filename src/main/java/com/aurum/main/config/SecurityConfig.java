@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/client/**").authenticated()
                         .requestMatchers("/api/dashboard/**").authenticated()
                         .requestMatchers("/api/client/**").authenticated()
-                        .requestMatchers("/api/event/**").authenticated()
+//                        .requestMatchers("/api/event/**").authenticated()
                         .requestMatchers("/api/product/**").authenticated()
                         .anyRequest().permitAll())
                 .exceptionHandling(ex -> ex

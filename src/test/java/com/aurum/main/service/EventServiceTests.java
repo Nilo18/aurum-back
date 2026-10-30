@@ -6,8 +6,8 @@ import com.aurum.main.dto.responses.*;
 import com.aurum.main.exception.*;
 import com.aurum.main.model.*;
 import com.aurum.main.repository.*;
+import com.aurum.main.utils.OtpPurpose;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,7 +17,6 @@ import java.time.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTests {
@@ -43,9 +42,9 @@ class EventServiceTests {
     }
 
     @Test void verificationEmailsGeneratedCode() {
-        var response = new OtpResponse("transaction", "123456");
-        when(otp.generateOtp()).thenReturn(response);
-        assertEquals(response, service.verifyCreateEventRequest(new EmailRequest("alice@example.com")));
+        var response = new OtpService.GeneratedOtp("transaction", "123456");
+        when(otp.generateOtp("alice@example.com", OtpPurpose.CREATE_EVENT)).thenReturn(response);
+        assertEquals(new OtpResponse(response.transactionKey()), service.verifyCreateEventRequest(new EmailRequest("alice@example.com")));
         verify(mail).formatAndSend(anyString(), eq("alice@example.com"), anyString(), contains("123456"));
     }
 
@@ -56,7 +55,7 @@ class EventServiceTests {
 
     @Test void creationComputesCostFromMenuAndGuestCountAndCreatesClient() {
         var request = order();
-        when(otp.validateOtp("transaction", "123456")).thenReturn(true);
+        when(otp.validateOtp("transaction", "alice@example.com", OtpPurpose.CREATE_EVENT, "123456")).thenReturn(true);
         when(clients.save(any(Client.class))).thenAnswer(call -> {
             Client client = call.getArgument(0); client.setId(42L); return client;
         });
@@ -68,13 +67,12 @@ class EventServiceTests {
                 && event.getTotalCost().compareTo(new BigDecimal("150")) == 0
                 && event.getGuestCount() == 10 && event.getStatus() == Event.EventStatus.REQUESTED));
         verify(clients).save(argThat(client -> client.getEmail().equals(request.client().email())));
-        verify(otp).invalidateOtp("transaction");
     }
 
     @Test void existingClientIsReused() {
         var request = order();
         var client = new Client(); client.setId(42L);
-        when(otp.validateOtp("transaction", "123456")).thenReturn(true);
+        when(otp.validateOtp("transaction", "alice@example.com", OtpPurpose.CREATE_EVENT, "123456")).thenReturn(true);
         when(clients.findFirstByEmailOrPhone(request.client().email(), request.client().phone())).thenReturn(Optional.of(client));
         when(clients.save(client)).thenReturn(client);
         when(menu.findAllByPublicIdIn(request.menuItemPublicIds())).thenReturn(List.of());

@@ -23,6 +23,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Log
 public class GlobalExceptionHandler {
+    @ExceptionHandler(OtpCapacityExceededException.class)
+    public ResponseEntity<Map<String, String>> handleOtpCapacityExceeded(OtpCapacityExceededException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> genericExceptionHandler(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(

@@ -28,10 +28,11 @@ class AuthControllerTests extends ControllerTestSupport {
     }
 
     @Test void verificationIsPublicAndValidatesEmail() throws Exception {
-        when(authService.verifyLoginRequest(any())).thenReturn(new OtpResponse("key", "123456"));
+        when(authService.verifyLoginRequest(any())).thenReturn(new OtpResponse("key"));
         mvc.perform(post("/api/auth/verify").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"staff@example.com\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.transactionKey").value("key"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.transactionKey").value("key"))
+                .andExpect(jsonPath("$.otp").doesNotExist());
         mvc.perform(post("/api/auth/verify").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"invalid\"}")).andExpect(status().isBadRequest());
         verify(authService, times(1)).verifyLoginRequest(any());
@@ -40,6 +41,16 @@ class AuthControllerTests extends ControllerTestSupport {
     @Test void demoLoginIsPublic() throws Exception {
         when(authService.loginAsDemo()).thenReturn(new AuthResponse(200, "demo-token"));
         mvc.perform(get("/api/auth/demo")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("demo-token"));
+    }
+
+    @Test void exhaustedOtpStorageReturns429WithoutExposingCode() throws Exception {
+        when(authService.verifyLoginRequest(any()))
+                .thenThrow(new OtpCapacityExceededException("Verification is busy. Please try again later."));
+        mvc.perform(post("/api/auth/verify").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"staff@example.com\"}"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.error").exists())
+                .andExpect(jsonPath("$.otp").doesNotExist());
     }
 
     @Test void incorrectCredentialsReturnConfiguredBadRequestResponse() throws Exception {

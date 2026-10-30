@@ -5,9 +5,8 @@ import com.aurum.main.dto.requests.EmailRequest;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.exception.InvalidOtpException;
+import com.aurum.main.utils.OtpPurpose;
 import lombok.Data;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +16,7 @@ public class HomeService {
     private final OtpService otpService;
 
     public OtpResponse sendContactRequestVerification(EmailRequest emailReq) {
-        OtpResponse otpRes = otpService.generateOtp();
+        var otpRes = otpService.generateOtp(emailReq.email(), OtpPurpose.CONTACT);
 
         mailService.formatAndSend(
                 "nikalongurashvili@gmail.com",
@@ -26,11 +25,12 @@ public class HomeService {
                 "Hello, here's your contact request verification code: " + otpRes.otp()
         );
 
-        return new OtpResponse(otpRes.transactionKey(), otpRes.otp());
+        return new OtpResponse(otpRes.transactionKey());
     }
 
     public GenericResponse sendContactEmail(ContactRequest request) {
-        boolean otpIsValid = otpService.validateOtp(request.transactionKey(), request.otp());
+        boolean otpIsValid = otpService.validateOtp(
+                request.transactionKey(), request.emailAddress(), OtpPurpose.CONTACT, request.otp());
 
         if (!otpIsValid) {
             throw new InvalidOtpException("Invalid verification code");
@@ -44,7 +44,6 @@ public class HomeService {
                         "\nPhone Number: " + request.phoneNumber()
         );
 
-        otpService.invalidateOtp(request.transactionKey());
 
         return new GenericResponse(200, "Contact received successfully");
     }

@@ -23,10 +23,11 @@ class HomeControllerTests extends ControllerTestSupport {
     }
 
     @Test void contactVerificationIsPublic() throws Exception {
-        when(homeService.sendContactRequestVerification(any())).thenReturn(new OtpResponse("key", "123456"));
+        when(homeService.sendContactRequestVerification(any())).thenReturn(new OtpResponse("key"));
         mvc.perform(post("/verify-contact-request").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"alice@example.com\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.transactionKey").value("key"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.transactionKey").value("key"))
+                .andExpect(jsonPath("$.otp").doesNotExist());
         verify(homeService).sendContactRequestVerification(new EmailRequest("alice@example.com"));
     }
 

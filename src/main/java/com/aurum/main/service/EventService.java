@@ -14,6 +14,7 @@ import com.aurum.main.model.Event;
 import com.aurum.main.model.FeedbackInvitation;
 import com.aurum.main.model.MenuItem;
 import com.aurum.main.repository.*;
+import com.aurum.main.utils.OtpPurpose;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public class EventService {
     private final FeedbackInvitationRepository feedbackInvitationRepository;
 
     public OtpResponse verifyCreateEventRequest(EmailRequest request) {
-        OtpResponse otpResponse = otpService.generateOtp();
+        var otpResponse = otpService.generateOtp(request.email(), OtpPurpose.CREATE_EVENT);
 
         mailService.formatAndSend(
                 "nikalongurashvili@gmail.com",
@@ -47,12 +48,13 @@ public class EventService {
                         otpResponse.otp()
         );
 
-        return new OtpResponse(otpResponse.transactionKey(), otpResponse.otp());
+        return new OtpResponse(otpResponse.transactionKey());
     }
 
     @Transactional
     public GenericResponse createEvent(EventOrderRequest request) {
-        boolean otpIsValid = otpService.validateOtp(request.transactionKey(), request.otp());
+        boolean otpIsValid = otpService.validateOtp(
+                request.transactionKey(), request.client().email(), OtpPurpose.CREATE_EVENT, request.otp());
 
         if (!otpIsValid) {
             throw new InvalidOtpException("Invalid verification code");
@@ -88,7 +90,6 @@ public class EventService {
         event.setNotes(request.event().notes());
         eventRepository.save(event);
 
-        otpService.invalidateOtp(request.transactionKey());
 
         return new GenericResponse(200, "Event added successfully!");
     }

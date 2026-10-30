@@ -10,6 +10,7 @@ import com.aurum.main.exception.InvalidPasswordException;
 import com.aurum.main.exception.InvalidRoleException;
 import com.aurum.main.model.Employee;
 import com.aurum.main.repository.EmployeeRepository;
+import com.aurum.main.utils.OtpPurpose;
 import lombok.Data;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class AuthService {
     private final JwtService jwtService;
 
     public OtpResponse verifyLoginRequest(EmailRequest request) {
-        OtpResponse otpRes = otpService.generateOtp();
+        var otpRes = otpService.generateOtp(request.email(), OtpPurpose.LOGIN);
 
         mailService.formatAndSend(
                 "nikalongurashvili@gmail.com",
@@ -33,11 +34,12 @@ public class AuthService {
                 "Hello, here's your login request verification code: " + otpRes.otp()
         );
 
-        return new OtpResponse(otpRes.transactionKey(), otpRes.otp());
+        return new OtpResponse(otpRes.transactionKey());
     }
 
     public AuthResponse login(LoginRequest request) {
-        boolean otpIsValid = otpService.validateOtp(request.transactionKey(), request.otp());
+        boolean otpIsValid = otpService.validateOtp(
+                request.transactionKey(), request.email(), OtpPurpose.LOGIN, request.otp());
 
         if (!otpIsValid) {
             throw new InvalidOtpException("Invalid verification code");
@@ -58,7 +60,6 @@ public class AuthService {
             throw new InvalidRoleException("Invalid role");
         }
 
-        otpService.invalidateOtp(request.transactionKey());
         String token = jwtService.generateEmployeeToken(employee);
 
         return new AuthResponse(200, token);
