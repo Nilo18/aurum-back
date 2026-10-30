@@ -1,5 +1,6 @@
 package com.aurum.main.controller;
 
+import com.aurum.main.dto.AuthenticatedUser;
 import com.aurum.main.dto.EmployeeDTO;
 import com.aurum.main.dto.requests.*;
 import com.aurum.main.dto.responses.AuthResponse;
@@ -9,6 +10,8 @@ import com.aurum.main.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,10 +21,13 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<EmployeeDTO>> getEmployees(@ModelAttribute EmployeeQuery query) {
-        return ResponseEntity.ok(employeeService.getEmployees(query));
+    public ResponseEntity<PageResponse<EmployeeDTO>> getEmployees(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @ModelAttribute EmployeeQuery query) {
+        return ResponseEntity.ok(employeeService.getEmployees(query, user.role()));
     }
 
+    @PreAuthorize("hasAuthority('OWNER')")
     @PostMapping(path = "/invite")
     public ResponseEntity<GenericResponse> inviteEmployee(
             @Valid @RequestBody InviteEmployeeRequest request) {
@@ -40,6 +46,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.completeInviteRegistration(request));
     }
 
+    @PreAuthorize("hasAuthority('OWNER')")
     @DeleteMapping
     public ResponseEntity<GenericResponse> deleteEmployee(@Valid @RequestBody EmailRequest request) {
         return ResponseEntity.ok(employeeService.deleteEmployee(request));

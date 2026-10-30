@@ -12,6 +12,7 @@ import com.aurum.main.service.SupplierService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,16 +39,19 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getAvailableProductCategories());
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<SupplierDTO> addSupplier(@Valid @RequestBody CreateSupplierRequest request) {
         return ResponseEntity.ok(supplierService.addSupplier(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<SupplierDTO> updateSupplier(@Valid @RequestBody UpdateSupplierRequest request) {
         return ResponseEntity.ok(supplierService.updateSupplier(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteSupplier(@PathVariable String publicId) {
         return ResponseEntity.ok(supplierService.deleteSupplier(publicId));

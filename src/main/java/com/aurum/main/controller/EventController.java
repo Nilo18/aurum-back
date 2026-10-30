@@ -12,6 +12,7 @@ import com.aurum.main.service.EventService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.createEvent(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<EventDTO> updateEvent(@Valid @RequestBody UpdateEventRequest request) {
         return ResponseEntity.ok(eventService.updateEvent(request));
@@ -40,6 +42,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEvents(query));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteEvent(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.deleteEvent(id));

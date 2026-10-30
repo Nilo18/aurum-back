@@ -7,7 +7,9 @@ import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.exception.ClientNotFoundException;
 import com.aurum.main.model.Client;
+import com.aurum.main.model.Employee;
 import com.aurum.main.repository.ClientRepository;
+import com.aurum.main.repository.MaskedSearchStrategy;
 import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -19,8 +21,13 @@ public class ClientService {
 //    private final ClientRepositoryCustom clientRepositoryCustom;
     private final ClientRepository clientRepository;
     private final SearchStrategy<ClientDTO, ClientQuery> clientStrategy;
+    private final MaskedSearchStrategy<ClientDTO, ClientQuery> maskedClientStrategy;
 
-    public PageResponse<ClientDTO> getClients(ClientQuery clientQuery) {
+    public PageResponse<ClientDTO> getClients(ClientQuery clientQuery, Employee.EmployeeRole role) {
+        if (role == Employee.EmployeeRole.DEMO) {
+            return maskedClientStrategy.searchMasked(clientQuery);
+        }
+
         return clientStrategy.search(clientQuery);
     }
 

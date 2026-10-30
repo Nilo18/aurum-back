@@ -1,5 +1,6 @@
 package com.aurum.main.controller;
 
+import com.aurum.main.dto.AuthenticatedUser;
 import com.aurum.main.dto.FeedbackDTO;
 import com.aurum.main.dto.requests.CreateFeedbackRequest;
 import com.aurum.main.dto.requests.FeedbackQuery;
@@ -10,6 +11,8 @@ import com.aurum.main.service.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,11 +32,15 @@ public class FeedbackController {
         return ResponseEntity.ok(feedbackService.createFeedback(request));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
-    public ResponseEntity<PageResponse<FeedbackDTO>> getAllFeedback(@Valid @ModelAttribute FeedbackQuery query) {
+    public ResponseEntity<PageResponse<FeedbackDTO>> getAllFeedback(
+//            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @ModelAttribute FeedbackQuery query) {
         return ResponseEntity.ok(feedbackService.getAllFeedback(query));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteFeedback(@PathVariable String publicId) {
         return ResponseEntity.ok(feedbackService.deleteFeedback(publicId));

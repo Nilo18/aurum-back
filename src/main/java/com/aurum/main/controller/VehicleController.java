@@ -10,6 +10,7 @@ import com.aurum.main.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,16 +24,19 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getVehicles(query));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<VehicleDTO> createVehicle(@Valid @RequestBody CreateVehicleRequest body) {
         return ResponseEntity.ok(vehicleService.addVehicle(body));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<VehicleDTO> updateVehicle(@Valid @RequestBody UpdateVehicleRequest body) {
         return ResponseEntity.ok(vehicleService.updateVehicle(body));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteVehicle(@PathVariable String publicId) {
         return ResponseEntity.ok(vehicleService.deleteVehicle(publicId));

@@ -7,6 +7,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -193,6 +194,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FeedbackInvitationExpiredException.class)
     public ResponseEntity<Map<String, String>> handleFeedbackInvitationExpired(FeedbackInvitationExpiredException ex) {
         return ResponseEntity.status(HttpStatus.GONE).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(
+            AccessDeniedException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "error", "You don't have permission to perform this action"
+                ));
     }
 
     @ExceptionHandler(DuplicateKeyException.class)

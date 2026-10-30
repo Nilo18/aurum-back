@@ -11,6 +11,7 @@ import com.aurum.main.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,16 +25,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts(query));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody CreateProductRequest request) {
         return ResponseEntity.ok(productService.addProduct(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<ProductDTO> updateProduct(@Valid @RequestBody UpdateProductRequest request) {
         return ResponseEntity.ok(productService.updateProduct(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping("/{publicId}")
     public ResponseEntity<GenericResponse> deleteProduct(@PathVariable String publicId) {
         return ResponseEntity.ok(productService.deleteProduct(publicId));

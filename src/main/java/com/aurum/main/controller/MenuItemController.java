@@ -12,6 +12,7 @@ import com.aurum.main.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,16 +35,19 @@ public class MenuItemController {
         return ResponseEntity.ok(menuItemService.getMenuItems(query));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<MenuItemDTO> addMenuItem(@Valid @RequestBody CreateMenuItemRequest request) {
         return ResponseEntity.ok(menuItemService.addMenuItem(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<MenuItemDTO> updateMenuItem(@Valid @RequestBody UpdateMenuItemRequest request) {
         return ResponseEntity.ok(menuItemService.updateMenuItem(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
     public ResponseEntity<GenericResponse> deleteMenuItem(@PathVariable String publicId) {
         return ResponseEntity.ok(menuItemService.deleteMenuItem(publicId));

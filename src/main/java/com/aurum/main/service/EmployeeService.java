@@ -1,5 +1,6 @@
 package com.aurum.main.service;
 
+import com.aurum.main.dto.ClientDTO;
 import com.aurum.main.dto.EmployeeDTO;
 import com.aurum.main.dto.requests.*;
 import com.aurum.main.dto.responses.AuthResponse;
@@ -10,6 +11,7 @@ import com.aurum.main.model.Employee;
 import com.aurum.main.model.Invitation;
 import com.aurum.main.repository.EmployeeRepository;
 import com.aurum.main.repository.InvitationRepository;
+import com.aurum.main.repository.MaskedSearchStrategy;
 import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ public class EmployeeService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final SearchStrategy<EmployeeDTO, EmployeeQuery> employeeStrategy;
+    private final MaskedSearchStrategy<EmployeeDTO, EmployeeQuery> maskedEmployeeStrategy;
 
     @Value("${spring.mail.username}")
     private String ownerMail;
@@ -110,7 +113,11 @@ public class EmployeeService {
         return new AuthResponse(200, token);
     }
 
-    public PageResponse<EmployeeDTO> getEmployees(EmployeeQuery query) {
+    public PageResponse<EmployeeDTO> getEmployees(EmployeeQuery query, Employee.EmployeeRole role) {
+        if (role == Employee.EmployeeRole.DEMO) {
+            return maskedEmployeeStrategy.searchMasked(query);
+        }
+
         return employeeStrategy.search(query);
     }
 

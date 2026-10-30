@@ -25,10 +25,10 @@ public class HomeController {
         return ResponseEntity.ok("Hello world");
     }
 
-   @PostMapping("/verify-contact-request")
-   public ResponseEntity<OtpResponse> verify(@RequestBody EmailRequest email) {
+    @PostMapping("/verify-contact-request")
+    public ResponseEntity<OtpResponse> verify(@RequestBody EmailRequest email) {
         return ResponseEntity.ok(homeService.sendContactRequestVerification(email));
-   }
+    }
 
     @PostMapping("/contact")
     public ResponseEntity<GenericResponse> contact(@Valid @RequestBody ContactRequest request) {

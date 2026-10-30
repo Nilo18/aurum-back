@@ -15,23 +15,46 @@ import java.util.Map;
 
 @Repository
 @Data
-public class EmployeeRepositoryCustomImpl implements SearchStrategy<EmployeeDTO, EmployeeQuery> {
+public class EmployeeRepositoryCustomImpl implements
+        SearchStrategy<EmployeeDTO, EmployeeQuery>, MaskedSearchStrategy<EmployeeDTO, EmployeeQuery>{
     private final JdbcClient jdbcClient;
 
     @Override
     public PageResponse<EmployeeDTO> search(EmployeeQuery query) {
+        return search(query, false);
+    }
+
+    @Override
+    public PageResponse<EmployeeDTO> searchMasked(EmployeeQuery query) {
+        return search(query, true);
+    }
+
+    private PageResponse<EmployeeDTO> search(EmployeeQuery query, boolean masked) {
+        String emailColumn = masked ? """
+                    CASE
+                        WHEN e.email IS NULL THEN NULL
+                        WHEN POSITION('@' IN e.email) <= 1
+                            THEN REPEAT('*', LENGTH(e.email))
+                        WHEN POSITION('@' IN e.email) = 2
+                            THEN '*' || SUBSTRING(e.email FROM 2)
+                        ELSE LEFT(e.email, 1)
+                            || REPEAT('*', POSITION('@' IN e.email) - 2)
+                            || SUBSTRING(e.email FROM POSITION('@' IN e.email))
+                    END AS email
+                """ : "e.email";
+
         DynamicSqlBuilder builder = new DynamicSqlBuilder(
                 """
                 SELECT
                     e.type AS specialty,
                     e.name,
                     e.salary,
-                    e.email,
+                    %s,
                     e.role,
                     e.status
                 FROM employees e
                 WHERE 1 = 1
-                """,
+                """.formatted(emailColumn),
                 "SELECT COUNT(*) FROM employees e WHERE 1 = 1"
         );
 
@@ -102,4 +125,5 @@ public class EmployeeRepositoryCustomImpl implements SearchStrategy<EmployeeDTO,
                 totalElements
         );
     }
+
 }

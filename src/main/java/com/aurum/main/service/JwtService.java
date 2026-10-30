@@ -73,8 +73,33 @@ public class JwtService {
                 "demo",
                 Employee.EmployeeRole.DEMO,
                 null,
-                new Date(System.currentTimeMillis() * 60 * 60 * 1000)
+                new Date(System.currentTimeMillis() + 60 * 60 * 1000L)
         );
+    }
+
+    public String extractRole(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(
+                token,
+                claims -> claims.get("employeeId", Long.class)
+        );
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            extractClaim(token, Claims::getSubject);
+            return true;
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
