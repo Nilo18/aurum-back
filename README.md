@@ -246,3 +246,37 @@ src/test/                        Automated tests
 ## Deployment configuration
 
 Use HTTPS and retain the signing secret securely across restarts. Configure trusted proxy forwarding so IP rate limits identify the intended client. Update the allowed frontend origin in `CorsConfig` and the hardcoded local frontend links in `EmployeeService` and `EventService` for your deployed frontend. Email sender addresses in the services also need to match your SMTP setup.
+
+## Deploy to Render with Docker
+
+Create a Render **Web Service** from this repository and select **Docker**. Use the repository root (the directory containing `pom.xml`) as the Docker build context and `./Dockerfile` as the Dockerfile path. Set the health check path to `/`.
+
+The multi-stage image builds with Java 25 and Maven, then runs the packaged application as an unprivileged user on a Java 25 runtime. Tests are skipped during the image build; run `mvn verify` in CI before deploying.
+
+The image defaults to the `production` profile and listens on `0.0.0.0` using Render's `PORT` environment variable, or port `10000` locally. No separate start command is needed.
+
+Configure these variables in the Render dashboard:
+
+| Variable | Value |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `production` |
+| `SPRING_DATASOURCE_URL` | PostgreSQL JDBC URL (`jdbc:postgresql://...`) |
+| `SPRING_DATASOURCE_USERNAME` | Database username |
+| `SPRING_DATASOURCE_PASSWORD` | Database password |
+| `JWT_SECRET` | Base64-encoded random signing key, at least 32 decoded bytes |
+| `JWT_EXPIRATION_MS` | `43200000` |
+| `RESEND_API_KEY` | Resend API key |
+| `SPRING_MAIL_USERNAME` | Owner/sender email required by employee invitations |
+
+Production mail uses the Resend API, so SMTP host, port, and password are not required. Sender addresses passed by the services must be authorized by your Resend configuration.
+
+The Docker build context excludes the local `application.properties`, `.env` files, and common private-key files. Supply runtime configuration through Render environment variables.
+
+To build and run locally with Docker:
+
+```bash
+docker build -t aurum-backend .
+docker run --rm -p 10000:10000 --env-file .env aurum-backend
+```
+
+Create the `.env` file locally with the runtime variables above; do not commit it. The Docker command explicitly loads it at runtime.
