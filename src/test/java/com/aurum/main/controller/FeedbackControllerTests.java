@@ -52,9 +52,9 @@ class FeedbackControllerTests extends ControllerTestSupport {
         verify(feedbackService).getAllFeedback(argThat(query -> query.getSize() == 5));
     }
 
-    @Test void anonymousFeedbackListIsDeniedByMethodSecurity() throws Exception {
-        // This route is permitAll at the HTTP layer; @PreAuthorize denies access.
-        mvc.perform(get("/api/feedback")).andExpect(status().isForbidden());
+    @Test void anonymousFeedbackListRequiresAuthentication() throws Exception {
+        // HTTP authorization rejects anonymous access before method security.
+        mvc.perform(get("/api/feedback")).andExpect(status().isUnauthorized());
         verifyNoInteractions(feedbackService);
     }
 

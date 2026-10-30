@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 // Verify real application wiring without requiring a database, SMTP server, or secrets.
 @SpringBootTest(properties = {
         "jwt.secret=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
-        "jwt.expiration-ms=3600000",
+        "jwt.expiration-ms=43200000",
         "spring.mail.username=test@example.com",
         "spring.autoconfigure.exclude="
                 + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"

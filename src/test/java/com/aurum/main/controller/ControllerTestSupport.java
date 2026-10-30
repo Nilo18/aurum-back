@@ -36,18 +36,26 @@ public abstract class ControllerTestSupport {
     @Autowired protected SupplierService supplierService;
     @Autowired protected VehicleService vehicleService;
     @Autowired protected JwtService jwtService;
+    @Autowired protected TokenActivityService tokenActivityService;
 
     @BeforeEach void configureMvc() {
-        reset(authService, clientService, dashboardService, employeeService, eventService, feedbackService, homeService, menuItemService, productService, supplierService, vehicleService, jwtService);
+        reset(authService, clientService, dashboardService, employeeService, eventService, feedbackService, homeService, menuItemService, productService, supplierService, vehicleService, jwtService, tokenActivityService);
+        when(jwtService.parseClaims(anyString())).thenThrow(new io.jsonwebtoken.JwtException("Invalid token"));
+        when(tokenActivityService.beforeRequest(any())).thenReturn(TokenActivityService.Decision.ALLOW);
         mvc = MockMvcBuilders.webAppContextSetup(context)
                 .addFilters(context.getBean(FilterChainProxy.class)).build();
     }
 
     protected String bearer(String role) {
         String token = "test-token-" + role;
-        when(jwtService.isTokenValid(token)).thenReturn(true);
-        when(jwtService.extractRole(token)).thenReturn(role);
-        when(jwtService.extractUserId(token)).thenReturn(role.equals("DEMO") ? null : 42L);
+        var claims = io.jsonwebtoken.Jwts.claims()
+                .id(java.util.UUID.randomUUID().toString())
+                .expiration(new java.util.Date(System.currentTimeMillis() + 3_600_000))
+                .add("role", role);
+        if (!role.equals("DEMO")) {
+            claims.add("employeeId", 42L);
+        }
+        doReturn(claims.build()).when(jwtService).parseClaims(token);
         return "Bearer " + token;
     }
 
@@ -68,6 +76,7 @@ public abstract class ControllerTestSupport {
         @Bean ProductService productService() { return mock(ProductService.class); }
         @Bean SupplierService supplierService() { return mock(SupplierService.class); }
         @Bean VehicleService vehicleService() { return mock(VehicleService.class); }
+        @Bean TokenActivityService tokenActivityService() { return mock(TokenActivityService.class); }
         @Bean JwtService jwtService() { return mock(JwtService.class); }
     }
 }

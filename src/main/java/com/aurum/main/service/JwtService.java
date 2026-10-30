@@ -14,6 +14,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -22,8 +23,8 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration-ms}")
-    private String expiration;
+    @Value("${jwt.expiration-ms:43200000}")
+    private long expiration = 43_200_000L;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
@@ -45,6 +46,7 @@ public class JwtService {
         JwtBuilder builder = Jwts.builder()
                 .claims(claims)
                 .subject(subject)
+                .id(UUID.randomUUID().toString())
                 .issuedAt(new Date());
 
         if (expiration != null) {
@@ -64,7 +66,7 @@ public class JwtService {
                 employee.getEmail(),
                 Employee.EmployeeRole.valueOf(employee.getRole().name()),
                 employee.getId(),
-                null
+                new Date(System.currentTimeMillis() + expiration)
         );
     }
 
@@ -103,11 +105,14 @@ public class JwtService {
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final io.jsonwebtoken.Claims claims = Jwts.parser()
+        return claimsResolver.apply(parseClaims(token));
+    }
+
+    public Claims parseClaims(String token) {
+        return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claimsResolver.apply(claims);
     }
 }

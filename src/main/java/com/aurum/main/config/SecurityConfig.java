@@ -2,7 +2,7 @@ package com.aurum.main.config;
 
 import com.aurum.main.filter.JwtAuthFilter;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/** Development configuration: all endpoints are public. Secure before deployment. */
+/** Public routes are explicitly allowed; all other requests require authentication. */
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -36,20 +36,18 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/auth/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST, "/api/feedback", "/api/feedback/verify-invitation")
-//                        .permitAll()
-//                        .requestMatchers("/api/feedback", "/api/feedback/**")
-//                        .authenticated()
-                        .requestMatchers("/api/supplier/**").authenticated()
-                        .requestMatchers("/api/vehicle/**").authenticated()
-                        .requestMatchers("/api/employee/**").authenticated()
-                        .requestMatchers("/api/client/**").authenticated()
-                        .requestMatchers("/api/dashboard/**").authenticated()
-                        .requestMatchers("/api/client/**").authenticated()
-//                        .requestMatchers("/api/event/**").authenticated()
-                        .requestMatchers("/api/product/**").authenticated()
-                        .anyRequest().permitAll())
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/", "/api/auth/demo", "/api/menu/request-event")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/auth/verify", "/api/auth/login",
+                                "/verify-contact-request", "/contact",
+                                "/api/event/verify", "/api/event",
+                                "/api/feedback", "/api/feedback/verify-invitation",
+                                "/api/employee/validate-invite", "/api/employee/register")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, exception) ->
                                 response.sendError(

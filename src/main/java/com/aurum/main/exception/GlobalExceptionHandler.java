@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.logging.Level;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
@@ -31,8 +32,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> genericExceptionHandler(Exception ex) {
+        log.log(Level.SEVERE, "Unexpected request failure", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                Map.of("error", ex.getMessage())
+                Map.of("error", "An unexpected error occurred. Please try again later.")
         );
     }
 

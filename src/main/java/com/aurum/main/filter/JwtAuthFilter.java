@@ -3,6 +3,7 @@ package com.aurum.main.filter;
 import com.aurum.main.dto.AuthenticatedUser;
 import com.aurum.main.model.Employee;
 import com.aurum.main.service.JwtService;
+import com.aurum.main.service.TokenActivityService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final TokenActivityService tokenActivityService;
 
     @Override
     protected void doFilterInternal(
@@ -42,13 +44,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
+        TokenActivityService.TokenIdentity identity;
         try {
-            if (!jwtService.isTokenValid(token)) {
-                throw new BadCredentialsException("Invalid token");
+            // Parse and verify once before using any claim for tracking or authentication.
+            var claims = jwtService.parseClaims(token);
+            Long userId = claims.get("employeeId", Long.class);
+            String role = claims.get("role", String.class);
+            if (claims.getId() == null || claims.getId().isBlank() || claims.getExpiration() == null) {
+                throw new BadCredentialsException("Missing token ID or expiration");
             }
-
-            Long userId = jwtService.extractUserId(token);
-            String role = jwtService.extractRole(token);
+            identity = new TokenActivityService.TokenIdentity(
+                    claims.getId(), claims.getExpiration().toInstant(), userId);
 
             if (role == null) {
                 throw new BadCredentialsException("Missing role");
@@ -59,6 +65,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (userId == null && employeeRole != Employee.EmployeeRole.DEMO) {
                 throw new BadCredentialsException("Missing employee ID");
+            }
+
+            var decision = tokenActivityService.beforeRequest(identity);
+            if (decision == TokenActivityService.Decision.REVOKED) {
+                throw new BadCredentialsException("Token revoked");
+            }
+            if (decision == TokenActivityService.Decision.CAPACITY_REACHED) {
+                response.setHeader("Retry-After", "60");
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                        "Authentication temporarily unavailable");
+                return;
             }
 
             AuthenticatedUser principal =
@@ -79,19 +96,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    "Invalid or expired token"
+                    "Invalid, expired, or revoked token"
             );
             return;
         }
 
         // Keep this outside the try/catch so downstream errors aren't
         // incorrectly treated as invalid tokens.
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            if (response.getStatus() == HttpServletResponse.SC_FORBIDDEN) {
+                tokenActivityService.recordForbidden(identity);
+            }
+        }
     }
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/error") || path.startsWith("/auth");
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        return path.equals("/error") || path.startsWith("/error/")
+                || path.equals("/api/auth") || path.startsWith("/api/auth/");
     }
 
 

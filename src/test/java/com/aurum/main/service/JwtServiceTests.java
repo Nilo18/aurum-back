@@ -34,11 +34,15 @@ class JwtServiceTests {
         employee.setId(42L);
         employee.setEmail("staff@example.com");
         employee.setRole(Employee.EmployeeRole.STAFF);
+        long before = System.currentTimeMillis();
         String token = service.generateEmployeeToken(employee);
         assertTrue(service.isTokenValid(token));
         assertEquals(42L, service.extractUserId(token));
         assertEquals("STAFF", service.extractRole(token));
         assertEquals(employee.getEmail(), service.extractClaim(token, io.jsonwebtoken.Claims::getSubject));
+        long expires = service.extractClaim(token, io.jsonwebtoken.Claims::getExpiration).getTime();
+        assertTrue(expires >= before + 43_199_000L);
+        assertTrue(expires <= System.currentTimeMillis() + 43_200_000L);
     }
 
     @Test void demoTokenHasNoEmployeeIdAndExpiresInOneHour() {
@@ -73,6 +77,14 @@ class JwtServiceTests {
     @Test void generationRejectsPastExpiration() {
         assertThrows(IllegalArgumentException.class, () -> service.generateToken("demo",
                 Employee.EmployeeRole.DEMO, null, new Date(System.currentTimeMillis() - 60_000)));
+    }
+
+    @Test void eachLoginProducesUniqueTokenIdEvenWithinSameSecond() {
+        String first = service.generateDemoToken();
+        String second = service.generateDemoToken();
+        assertNotEquals(first, second);
+        assertNotEquals(service.parseClaims(first).getId(), service.parseClaims(second).getId());
+        assertDoesNotThrow(() -> UUID.fromString(service.parseClaims(first).getId()));
     }
 
 }

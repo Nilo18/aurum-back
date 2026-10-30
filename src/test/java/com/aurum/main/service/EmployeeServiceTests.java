@@ -84,30 +84,115 @@ class EmployeeServiceTests {
         assertEquals(new GenericResponse(200, "Invitation validated successfully!"), service.validateInvitation(request));
     }
 
-    @Test void registrationEncodesPasswordCreatesPendingEmployeeAndConsumesInvitation() {
+    private Invitation registrationInvitation() {
         var invitation = new Invitation();
         invitation.setEmail("staff@example.com");
         invitation.setRole(Employee.EmployeeRole.STAFF);
         invitation.setType(Employee.EmployeeType.CHEF);
         invitation.setSalary(BigDecimal.TEN);
-        when(invitations.findByToken("token")).thenReturn(Optional.of(invitation));
+        invitation.setExpiresAt(Instant.now().plusSeconds(3600));
+        when(invitations.findByTokenForUpdate("token")).thenReturn(Optional.of(invitation));
+        return invitation;
+    }
+
+    private CompleteInviteRegistrationRequest registrationRequest() {
+        return new CompleteInviteRegistrationRequest("token", "Alice", "password");
+    }
+
+    @Test void registrationEncodesPasswordCreatesPendingEmployeeAndConsumesLockedInvitation() {
+        var invitation = registrationInvitation();
         when(encoder.encode("password")).thenReturn("encoded");
         when(employees.save(any(Employee.class))).thenAnswer(call -> call.getArgument(0));
         when(jwt.generateEmployeeToken(any(Employee.class))).thenReturn("signed-token");
-        assertEquals(new AuthResponse(200, "signed-token"), service.completeInviteRegistration(
-                new CompleteInviteRegistrationRequest("token", "Alice", "password")));
+        assertEquals(new AuthResponse(200, "signed-token"), service.completeInviteRegistration(registrationRequest()));
         verify(employees).save(argThat(employee -> employee.getName().equals("Alice")
                 && employee.getPassword().equals("encoded")
                 && employee.getEmail().equals(invitation.getEmail())
                 && employee.getRole() == Employee.EmployeeRole.STAFF
                 && employee.getStatus() == Employee.EmployeeStatus.PENDING));
-        verify(invitations).delete(invitation);
+        var order = inOrder(invitations, employees, jwt);
+        order.verify(invitations).findByTokenForUpdate("token");
+        order.verify(employees).existsByEmail(invitation.getEmail());
+        order.verify(employees).save(any(Employee.class));
+        order.verify(invitations).delete(invitation);
+        order.verify(jwt).generateEmployeeToken(any(Employee.class));
     }
 
     @Test void registrationRequiresExistingInvitation() {
         assertThrows(InvitationTokenNotFoundException.class, () -> service.completeInviteRegistration(
                 new CompleteInviteRegistrationRequest("missing", "Alice", "password")));
         verifyNoInteractions(employees, encoder, jwt);
+    }
+
+    @Test void registrationRejectsExpiredInvitationWithoutPriorValidationCall() {
+        var invitation = registrationInvitation();
+        invitation.setExpiresAt(Instant.now().minusSeconds(1));
+        assertThrows(InvitationTokenExpiredException.class,
+                () -> service.completeInviteRegistration(registrationRequest()));
+        verifyNoInteractions(employees, encoder, jwt);
+        verify(invitations, never()).delete(any(Invitation.class));
+    }
+
+    @Test void registrationRejectsInvitationWithMissingExpiration() {
+        registrationInvitation().setExpiresAt(null);
+        assertThrows(InvitationTokenExpiredException.class,
+                () -> service.completeInviteRegistration(registrationRequest()));
+        verifyNoInteractions(employees, encoder, jwt);
+        verify(invitations, never()).delete(any(Invitation.class));
+    }
+
+    @Test void registrationRejectsExistingMemberWithoutEncodingPasswordOrIssuingToken() {
+        var invitation = registrationInvitation();
+        when(employees.existsByEmail(invitation.getEmail())).thenReturn(true);
+        assertThrows(BadInvitationRequestException.class,
+                () -> service.completeInviteRegistration(registrationRequest()));
+        verify(employees, never()).save(any(Employee.class));
+        verify(invitations, never()).delete(any(Invitation.class));
+        verifyNoInteractions(encoder, jwt);
+    }
+
+    @Test void registrationCannotReuseConsumedInvitation() {
+        var invitation = registrationInvitation();
+        when(encoder.encode("password")).thenReturn("encoded");
+        when(employees.save(any(Employee.class))).thenAnswer(call -> call.getArgument(0));
+        when(jwt.generateEmployeeToken(any(Employee.class))).thenReturn("signed-token");
+        doAnswer(call -> {
+            when(invitations.findByTokenForUpdate("token")).thenReturn(Optional.empty());
+            return null;
+        }).when(invitations).delete(invitation);
+        service.completeInviteRegistration(registrationRequest());
+        assertThrows(InvitationTokenNotFoundException.class,
+                () -> service.completeInviteRegistration(registrationRequest()));
+        verify(employees, times(1)).save(any(Employee.class));
+        verify(jwt, times(1)).generateEmployeeToken(any(Employee.class));
+    }
+
+    @Test void saveFailureDoesNotConsumeInvitationOrIssueToken() {
+        registrationInvitation();
+        when(employees.save(any(Employee.class))).thenThrow(new IllegalStateException("Database unavailable"));
+        assertThrows(IllegalStateException.class,
+                () -> service.completeInviteRegistration(registrationRequest()));
+        verify(invitations, never()).delete(any(Invitation.class));
+        verifyNoInteractions(jwt);
+    }
+
+    @Test void failureAfterInvitationDeletionRollsBackRegistrationTransaction() {
+        registrationInvitation();
+        when(employees.save(any(Employee.class))).thenAnswer(call -> call.getArgument(0));
+        when(jwt.generateEmployeeToken(any(Employee.class))).thenThrow(new IllegalStateException("Signing failed"));
+        var manager = mock(org.springframework.transaction.PlatformTransactionManager.class);
+        var status = new org.springframework.transaction.support.SimpleTransactionStatus();
+        when(manager.getTransaction(any())).thenReturn(status);
+        var interceptor = new org.springframework.transaction.interceptor.TransactionInterceptor(
+                manager, new org.springframework.transaction.annotation.AnnotationTransactionAttributeSource());
+        var factory = new org.springframework.aop.framework.ProxyFactory(service);
+        factory.addAdvice(interceptor);
+        var transactionalService = (EmployeeService) factory.getProxy();
+        assertThrows(IllegalStateException.class,
+                () -> transactionalService.completeInviteRegistration(registrationRequest()));
+        verify(invitations).delete(any(Invitation.class));
+        verify(manager).rollback(status);
+        verify(manager, never()).commit(any());
     }
 
     @Test void demoUsesMaskedSearchAndStaffUsesRegularSearch() {

@@ -17,6 +17,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -80,20 +81,17 @@ public class EmployeeService {
         Invitation suggestedInvitation = invitationRepository.findByToken(request.token())
                 .orElseThrow(() -> new InvitationTokenNotFoundException("Invitation token not found"));
 
-        if (suggestedInvitation.getExpiresAt().isBefore(Instant.now())) {
-            throw new InvitationTokenExpiredException("Invitation expired");
-        }
-
-        if (employeeRepository.existsByEmail(suggestedInvitation.getEmail())) {
-            throw new BadInvitationRequestException("Invitation cannot be accepted");
-        }
+        ensureInvitationCanBeAccepted(suggestedInvitation);
 
         return new GenericResponse(200, "Invitation validated successfully!");
     }
 
+    @Transactional
     public AuthResponse completeInviteRegistration(CompleteInviteRegistrationRequest request) {
-        Invitation invitation = invitationRepository.findByToken(request.token())
+        Invitation invitation = invitationRepository.findByTokenForUpdate(request.token())
                 .orElseThrow(() -> new InvitationTokenNotFoundException("Invitation token not found"));
+
+        ensureInvitationCanBeAccepted(invitation);
 
         Employee employee = new Employee();
         employee.setName(request.name());
@@ -111,6 +109,15 @@ public class EmployeeService {
         String token = jwtService.generateEmployeeToken(employee);
 
         return new AuthResponse(200, token);
+    }
+
+    private void ensureInvitationCanBeAccepted(Invitation invitation) {
+        if (invitation.getExpiresAt() == null || !invitation.getExpiresAt().isAfter(Instant.now())) {
+            throw new InvitationTokenExpiredException("Invitation expired");
+        }
+        if (employeeRepository.existsByEmail(invitation.getEmail())) {
+            throw new BadInvitationRequestException("Invitation cannot be accepted");
+        }
     }
 
     public PageResponse<EmployeeDTO> getEmployees(EmployeeQuery query, Employee.EmployeeRole role) {
