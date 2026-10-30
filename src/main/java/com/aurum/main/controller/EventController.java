@@ -44,7 +44,7 @@ public class EventController {
 
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping(path = "/{publicId}")
-    public ResponseEntity<GenericResponse> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<GenericResponse> deleteEvent(@PathVariable("publicId") Long id) {
         return ResponseEntity.ok(eventService.deleteEvent(id));
     }
 }

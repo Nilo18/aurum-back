@@ -17,7 +17,9 @@ class SupplierServiceTests {
     private final SupplierRepository suppliers = mock(SupplierRepository.class);
     private final SupplierCategoryRepository categories = mock(SupplierCategoryRepository.class);
     private final ProductRepository products = mock(ProductRepository.class);
-    private final SupplierService service = new SupplierService(null, suppliers, categories, products);
+    @SuppressWarnings("unchecked")
+    private final SearchStrategy<com.aurum.main.dto.SupplierDTO, com.aurum.main.dto.requests.SupplierQuery> search = mock(SearchStrategy.class);
+    private final SupplierService service = new SupplierService(search, suppliers, categories, products);
 
     private UpdateSupplierRequest request() {
         return new UpdateSupplierRequest("public-id", "Updated", "City", "Street", "12",
@@ -57,4 +59,40 @@ class SupplierServiceTests {
         verify(suppliers, never()).save(any());
         verifyNoInteractions(categories, products);
     }
+
+    @Test void creationAssignsOnlyUnassignedProductsInSelectedCategories() {
+        when(suppliers.save(any(Supplier.class))).thenAnswer(call -> {
+            Supplier supplier = call.getArgument(0); supplier.setId(42L); return supplier;
+        });
+        var request = new com.aurum.main.dto.requests.CreateSupplierRequest("Supplier", "City", "Street", "12", Set.of(ProductCategory.TABLEWARE));
+        var result = service.addSupplier(request);
+        assertDoesNotThrow(() -> java.util.UUID.fromString(result.publicId()));
+        assertEquals(request.categories(), result.categories());
+        verify(categories).saveAll(42L, result.publicId(), request.categories());
+        verify(products).assignUnassignedProducts(42L, Set.of("TABLEWARE"));
+        verify(products, never()).unassignProductsOutsideCategories(anyLong(), anySet());
+    }
+
+    @Test void availableCategoriesExcludeAssignedCategories() {
+        when(categories.findAssignedCategories()).thenReturn(Set.of(ProductCategory.TABLEWARE));
+        var expected = java.util.EnumSet.allOf(ProductCategory.class); expected.remove(ProductCategory.TABLEWARE);
+        assertEquals(expected, service.getAvailableProductCategories());
+    }
+
+    @Test void searchAndSupplierNamesReturnRepositoryResults() {
+        var query = new com.aurum.main.dto.requests.SupplierQuery();
+        var page = new com.aurum.main.dto.responses.PageResponse<com.aurum.main.dto.SupplierDTO>(java.util.List.of(), 0, 10, 0);
+        when(search.search(query)).thenReturn(page);
+        assertSame(page, service.getSuppliers(query));
+        var names = java.util.List.of(new com.aurum.main.dto.ProductSectionSupplierDTO("supplier", "Name"));
+        when(suppliers.findAllSupplierNames()).thenReturn(names);
+        assertSame(names, service.getSupplierNames());
+    }
+
+    @Test void deletionDistinguishesMissingAndExistingSupplier() {
+        assertThrows(SupplierNotFoundException.class, () -> service.deleteSupplier("missing"));
+        when(suppliers.deleteByPublicId("supplier")).thenReturn(1);
+        assertEquals(new com.aurum.main.dto.responses.GenericResponse(200, "Supplier deleted successfully"), service.deleteSupplier("supplier"));
+    }
+
 }
