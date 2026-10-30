@@ -1,6 +1,7 @@
 package com.aurum.main.exception;
 
 import lombok.extern.java.Log;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -24,6 +25,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Log
 public class GlobalExceptionHandler {
+    private void logFailure(String description, Exception ex) {
+        log.log(Level.SEVERE, description, ex);
+        Throwable root = NestedExceptionUtils.getMostSpecificCause(ex);
+        String message = root.getMessage() == null ? "No exception message" : root.getMessage();
+        log.log(Level.SEVERE, "ERROR_SUMMARY: {0}; exception={1}; rootCause={2}; message={3}",
+                new Object[]{description, ex.getClass().getName(), root.getClass().getName(),
+                        message.replace('\r', ' ').replace('\n', ' ')});
+    }
+
     @ExceptionHandler(OtpCapacityExceededException.class)
     public ResponseEntity<Map<String, String>> handleOtpCapacityExceeded(OtpCapacityExceededException ex) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
@@ -32,7 +42,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> genericExceptionHandler(Exception ex) {
-        log.log(Level.SEVERE, "Unexpected request failure", ex);
+        logFailure("Unexpected request failure", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of("error", "An unexpected error occurred. Please try again later.")
         );
@@ -116,7 +126,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Map<String, String>> handleDatabaseError(DataAccessException ex) {
-        log.log(Level.SEVERE, "Database operation failed", ex);
+        logFailure("Database operation failed", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "A database error occurred. Please try again later."));
     }
 
