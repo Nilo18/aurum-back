@@ -16,6 +16,7 @@ public class SmtpMailService implements MailStrategy {
         mailMessage.setFrom(from);
         mailMessage.setTo(to);
         mailMessage.setSubject(subject);
+        mailMessage.setReplyTo(from);
         mailMessage.setText(
                 message
         );

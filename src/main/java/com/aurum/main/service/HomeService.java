@@ -7,10 +7,12 @@ import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.exception.InvalidOtpException;
 import com.aurum.main.utils.OtpPurpose;
 import lombok.Data;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
 @Service
 @Data
+@Log
 public class HomeService {
     private final MailStrategy mailStrategy;
     private final OtpService otpService;
@@ -41,7 +43,8 @@ public class HomeService {
                 "nikalongurashvili@gmail.com",
                 "Aurum Question",
                 request.message() + "\nName: " + request.fullName() +
-                        "\nPhone Number: " + request.phoneNumber()
+                        "\nPhone Number: " + request.phoneNumber() +
+                        "\nEmail: " + request.emailAddress()
         );
 
 
