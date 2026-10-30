@@ -245,7 +245,7 @@ src/test/                        Automated tests
 
 ## Deployment configuration
 
-Use HTTPS and retain the signing secret securely across restarts. Configure trusted proxy forwarding so IP rate limits identify the intended client. Update the allowed frontend origin in `CorsConfig` and the hardcoded local frontend links in `EmployeeService` and `EventService` for your deployed frontend. Email sender addresses in the services also need to match your SMTP setup.
+Use HTTPS and retain the signing secret securely across restarts. Configure trusted proxy forwarding so IP rate limits identify the intended client. Keep the frontend origins in `CorsConfig`, `EmployeeService`, and `EventService` aligned with your deployed frontend. Employee and feedback invitation links select localhost only for the exact `http://localhost:4200` request origin; all other origins, including an absent header, select the production frontend. Email sender addresses in the services also need to match your SMTP setup.
 
 ## Deploy to Render with Docker
 

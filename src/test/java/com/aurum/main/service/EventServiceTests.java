@@ -8,6 +8,10 @@ import com.aurum.main.model.*;
 import com.aurum.main.repository.*;
 import com.aurum.main.utils.OtpPurpose;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,6 +34,7 @@ class EventServiceTests {
     @Mock OtpService otp;
     @Mock FeedbackInvitationRepository invitations;
     @InjectMocks EventService service;
+    private final MockHttpServletRequest servlet = new MockHttpServletRequest();
 
     private EventOrderRequest order() {
         return new EventOrderRequest(new ClientDTO(Client.ClientType.PERSON, "Alice", "alice@example.com", "+995555123456"),
@@ -83,7 +88,7 @@ class EventServiceTests {
     }
 
     @Test void missingEventCannotBeUpdated() {
-        assertThrows(EventNotFoundException.class, () -> service.updateEvent(update(Event.EventStatus.CONFIRMED)));
+        assertThrows(EventNotFoundException.class, () -> service.updateEvent(update(Event.EventStatus.CONFIRMED), servlet));
         verify(events, never()).save(any());
     }
 
@@ -91,7 +96,7 @@ class EventServiceTests {
         for (var status : List.of(Event.EventStatus.COMPLETED, Event.EventStatus.CANCELLED, Event.EventStatus.REJECTED)) {
             var event = new Event(); event.setStatus(status);
             when(events.findByPublicId("event")).thenReturn(Optional.of(event));
-            assertThrows(EventCannotBeUpdatedException.class, () -> service.updateEvent(update(Event.EventStatus.CONFIRMED)));
+            assertThrows(EventCannotBeUpdatedException.class, () -> service.updateEvent(update(Event.EventStatus.CONFIRMED), servlet));
         }
         verify(events, never()).save(any());
     }
@@ -99,22 +104,32 @@ class EventServiceTests {
     @Test void futureEventCannotBeCompleted() {
         var event = new Event(); event.setDate(LocalDate.now().plusDays(1));
         when(events.findByPublicId("event")).thenReturn(Optional.of(event));
-        assertThrows(EventCannotBeUpdatedException.class, () -> service.updateEvent(update(Event.EventStatus.COMPLETED)));
+        assertThrows(EventCannotBeUpdatedException.class, () -> service.updateEvent(update(Event.EventStatus.COMPLETED), servlet));
         verify(events, never()).save(any());
     }
 
-    @Test void completingEventSendsExpiringFeedbackInvitation() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"http://localhost:4200", "https://aurum-front-sigma.vercel.app", "https://untrusted.example"})
+    void completingEventSendsExpiringFeedbackInvitation(String origin) {
+        if (origin != null) servlet.addHeader("Origin", origin);
         var event = new Event(); event.setId(5L); event.setClientId(42L); event.setDate(LocalDate.now().minusDays(1));
         var client = new Client(); client.setName("Alice"); client.setEmail("alice@example.com");
         when(events.findByPublicId("event")).thenReturn(Optional.of(event));
         when(events.save(event)).thenReturn(event);
         when(clients.findById(42L)).thenReturn(Optional.of(client));
-        var result = service.updateEvent(update(Event.EventStatus.COMPLETED));
+        var result = service.updateEvent(update(Event.EventStatus.COMPLETED), servlet);
         assertEquals(Event.EventStatus.COMPLETED, result.status());
         assertEquals("Alice", result.clientName());
         verify(invitations).save(argThat(invitation -> invitation.getEventId().equals(5L)
                 && invitation.getUsedAt() == null && invitation.getExpiresAt().isAfter(LocalDateTime.now().plusDays(6))));
         verify(mail).formatAndSend(anyString(), eq(client.getEmail()), eq("Feedback Request"), contains("feedback?token="));
+        var invitationCaptor = org.mockito.ArgumentCaptor.forClass(FeedbackInvitation.class);
+        verify(invitations).save(invitationCaptor.capture());
+        String expectedFrontend = "http://localhost:4200".equals(origin)
+                ? "http://localhost:4200" : "https://aurum-front-sigma.vercel.app";
+        verify(mail).formatAndSend(anyString(), eq(client.getEmail()), eq("Feedback Request"),
+                contains(expectedFrontend + "/feedback?token=" + invitationCaptor.getValue().getTokenHash()));
     }
 
     @Test void ordinaryUpdateDoesNotSendFeedbackInvitation() {
@@ -122,7 +137,7 @@ class EventServiceTests {
         when(events.findByPublicId("event")).thenReturn(Optional.of(event));
         when(events.save(event)).thenReturn(event);
         when(clients.findById(42L)).thenReturn(Optional.of(new Client()));
-        assertEquals(Event.EventStatus.CONFIRMED, service.updateEvent(update(Event.EventStatus.CONFIRMED)).status());
+        assertEquals(Event.EventStatus.CONFIRMED, service.updateEvent(update(Event.EventStatus.CONFIRMED), servlet).status());
         verifyNoInteractions(invitations, mail);
     }
 

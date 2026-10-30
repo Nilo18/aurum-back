@@ -10,6 +10,7 @@ import com.aurum.main.dto.responses.OtpResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.EventService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,8 +34,8 @@ public class EventController {
 
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping
-    public ResponseEntity<EventDTO> updateEvent(@Valid @RequestBody UpdateEventRequest request) {
-        return ResponseEntity.ok(eventService.updateEvent(request));
+    public ResponseEntity<EventDTO> updateEvent(@Valid @RequestBody UpdateEventRequest request, HttpServletRequest servlet) {
+        return ResponseEntity.ok(eventService.updateEvent(request, servlet));
     }
 
     @GetMapping

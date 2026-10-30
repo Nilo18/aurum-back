@@ -7,6 +7,7 @@ import com.aurum.main.dto.responses.AuthResponse;
 import com.aurum.main.dto.responses.GenericResponse;
 import com.aurum.main.dto.responses.PageResponse;
 import com.aurum.main.service.EmployeeService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,9 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('OWNER')")
     @PostMapping(path = "/invite")
     public ResponseEntity<GenericResponse> inviteEmployee(
-            @Valid @RequestBody InviteEmployeeRequest request) {
-        return ResponseEntity.ok(employeeService.inviteEmployee(request));
+            @Valid @RequestBody InviteEmployeeRequest request,
+            HttpServletRequest servlet) {
+        return ResponseEntity.ok(employeeService.inviteEmployee(request, servlet));
     }
 
     @PostMapping(path = "/validate-invite")

@@ -12,6 +12,7 @@ import com.aurum.main.repository.EmployeeRepository;
 import com.aurum.main.repository.InvitationRepository;
 import com.aurum.main.repository.MaskedSearchStrategy;
 import com.aurum.main.repository.SearchStrategy;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +37,7 @@ public class EmployeeService {
     @Value("${spring.mail.username}")
     private String ownerMail;
 
-    public GenericResponse inviteEmployee(InviteEmployeeRequest request) {
+    public GenericResponse inviteEmployee(InviteEmployeeRequest request, HttpServletRequest servlet) {
         boolean alreadyMember = this.employeeRepository.existsByEmail(request.email());
 
         if (alreadyMember) {
@@ -64,7 +65,13 @@ public class EmployeeService {
         invitation.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
         invitationRepository.save(invitation);
 
-        String link = "http://localhost:4200/staff-register?token=" + token;
+        String origin = servlet.getHeader("Origin");
+        String frontendUrl =
+                "http://localhost:4200".equals(origin)
+                        ? "http://localhost:4200"
+                        : "https://aurum-front-sigma.vercel.app";
+
+        String link = frontendUrl + "/staff-register?token=" + token;
         mailStrategy.formatAndSend(
                 ownerMail,
                 request.email(),

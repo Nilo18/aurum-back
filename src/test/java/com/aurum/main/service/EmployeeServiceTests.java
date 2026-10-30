@@ -7,6 +7,10 @@ import com.aurum.main.exception.*;
 import com.aurum.main.model.*;
 import com.aurum.main.repository.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +33,7 @@ class EmployeeServiceTests {
     @Mock SearchStrategy<EmployeeDTO, EmployeeQuery> search;
     @Mock MaskedSearchStrategy<EmployeeDTO, EmployeeQuery> masked;
     @InjectMocks EmployeeService service;
+    private final MockHttpServletRequest servlet = new MockHttpServletRequest();
 
     private InviteEmployeeRequest invite(Employee.EmployeeRole role) {
         return new InviteEmployeeRequest(Employee.EmployeeType.CHEF, BigDecimal.TEN, "staff@example.com", role);
@@ -36,26 +41,30 @@ class EmployeeServiceTests {
 
     @Test void cannotInviteExistingEmployee() {
         when(employees.existsByEmail("staff@example.com")).thenReturn(true);
-        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.STAFF)));
+        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.STAFF), servlet));
         verifyNoInteractions(invitations, mail);
     }
 
     @Test void cannotInviteAnotherOwner() {
-        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.OWNER)));
+        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.OWNER), servlet));
         verifyNoInteractions(invitations, mail);
     }
 
     @Test void cannotSendDuplicatePendingInvitation() {
         when(invitations.existsByEmail("staff@example.com")).thenReturn(true);
-        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.STAFF)));
+        assertThrows(BadInvitationRequestException.class, () -> service.inviteEmployee(invite(Employee.EmployeeRole.STAFF), servlet));
         verify(invitations, never()).save(any());
         verifyNoInteractions(mail);
     }
 
-    @Test void invitationPersistsRoleSalaryAndExpiringTokenAndEmailsLink() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"http://localhost:4200", "https://aurum-front-sigma.vercel.app", "https://untrusted.example"})
+    void invitationPersistsRoleSalaryAndExpiringTokenAndEmailsLink(String origin) {
+        if (origin != null) servlet.addHeader("Origin", origin);
         service.setOwnerMail("owner@example.com");
         var request = invite(Employee.EmployeeRole.STAFF);
-        service.inviteEmployee(request);
+        service.inviteEmployee(request, servlet);
         var captor = org.mockito.ArgumentCaptor.forClass(Invitation.class);
         verify(invitations).save(captor.capture());
         var invitation = captor.getValue();
@@ -66,6 +75,10 @@ class EmployeeServiceTests {
         assertTrue(invitation.getExpiresAt().isAfter(Instant.now().plusSeconds(86_390)));
         assertDoesNotThrow(() -> UUID.fromString(invitation.getToken()));
         verify(mail).formatAndSend(eq("owner@example.com"), eq(request.email()), anyString(), contains(invitation.getToken()));
+        String expectedFrontend = "http://localhost:4200".equals(origin)
+                ? "http://localhost:4200" : "https://aurum-front-sigma.vercel.app";
+        verify(mail).formatAndSend(eq("owner@example.com"), eq(request.email()), anyString(),
+                contains(expectedFrontend + "/staff-register?token=" + invitation.getToken()));
     }
 
     @Test void validatesOnlyExistingUnexpiredInvitationsForNonMembers() {

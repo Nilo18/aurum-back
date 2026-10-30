@@ -70,7 +70,7 @@ class EventControllerTests extends ControllerTestSupport {
         mvc.perform(put("/api/event").header("Authorization", bearer("STAFF"))
                 .contentType(MediaType.APPLICATION_JSON).content(payload)).andExpect(status().isForbidden());
         verifyNoInteractions(eventService);
-        when(eventService.updateEvent(any())).thenReturn(new EventDTO("event", "Alice", Event.EventType.WEDDING,
+        when(eventService.updateEvent(any(), any(jakarta.servlet.http.HttpServletRequest.class))).thenReturn(new EventDTO("event", "Alice", Event.EventType.WEDDING,
                 LocalDate.now(), BigDecimal.TEN, 10, Event.Location.HOTEL, Event.EventStatus.CONFIRMED));
         mvc.perform(put("/api/event").header("Authorization", bearer("OWNER"))
                 .contentType(MediaType.APPLICATION_JSON).content(payload))

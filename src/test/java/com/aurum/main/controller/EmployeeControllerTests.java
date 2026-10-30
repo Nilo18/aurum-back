@@ -32,7 +32,7 @@ class EmployeeControllerTests extends ControllerTestSupport {
     }
 
     @Test void ownerCanInviteEmployee() throws Exception {
-        when(employeeService.inviteEmployee(any())).thenReturn(new GenericResponse(200, "Invited"));
+        when(employeeService.inviteEmployee(any(), any(jakarta.servlet.http.HttpServletRequest.class))).thenReturn(new GenericResponse(200, "Invited"));
         mvc.perform(post("/api/employee/invite").header("Authorization", bearer("OWNER"))
                 .contentType(MediaType.APPLICATION_JSON).content("""
                 {"type":"CHEF","salary":1000,"email":"staff@example.com","role":"STAFF"}

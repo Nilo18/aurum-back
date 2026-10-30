@@ -16,6 +16,7 @@ import com.aurum.main.model.MenuItem;
 import com.aurum.main.repository.*;
 import com.aurum.main.utils.OtpPurpose;
 import lombok.Data;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,7 +94,7 @@ public class EventService {
         return new GenericResponse(200, "Event added successfully!");
     }
 
-    public EventDTO updateEvent(UpdateEventRequest request) {
+    public EventDTO updateEvent(UpdateEventRequest request, HttpServletRequest servlet) {
         Event event = eventRepository.findByPublicId(request.publicId())
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
@@ -134,7 +135,13 @@ public class EventService {
             feedbackInvitation.setUsedAt(null);
             feedbackInvitationRepository.save(feedbackInvitation);
 
-            String link = "http://localhost:4200/feedback?token=" + token;
+            String origin = servlet.getHeader("Origin");
+            String frontendUrl =
+                    "http://localhost:4200".equals(origin)
+                            ? "http://localhost:4200"
+                            : "https://aurum-front-sigma.vercel.app";
+
+            String link = frontendUrl + "/feedback?token=" + token;
 
             mailStrategy.formatAndSend(
                     "nikalongurashvili@gmail.com",
