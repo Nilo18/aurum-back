@@ -33,4 +33,9 @@ public class FeedbackController {
     public ResponseEntity<PageResponse<FeedbackDTO>> getAllFeedback(@Valid @ModelAttribute FeedbackQuery query) {
         return ResponseEntity.ok(feedbackService.getAllFeedback(query));
     }
+
+    @DeleteMapping(path = "/{publicId}")
+    public ResponseEntity<GenericResponse> deleteFeedback(@PathVariable String publicId) {
+        return ResponseEntity.ok(feedbackService.deleteFeedback(publicId));
+    }
 }

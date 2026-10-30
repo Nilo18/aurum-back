@@ -86,4 +86,15 @@ public class FeedbackService {
     public PageResponse<FeedbackDTO> getAllFeedback(FeedbackQuery query) {
         return searchStrategy.search(query);
     }
+
+    public GenericResponse deleteFeedback(String publicId) {
+        int deleted = feedbackRepository.deleteByPublicId(publicId);
+
+        if (deleted == 0) {
+            throw new FeedbackNotFoundException("Feedback not found");
+        }
+
+        return new GenericResponse(200, "Feedback deleted successfully");
+    }
+
 }

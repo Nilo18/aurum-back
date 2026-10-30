@@ -8,4 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
 public interface FeedbackRepository extends CrudRepository<Feedback, Long> {
+    int deleteByPublicId(String publicId);
 }
