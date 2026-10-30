@@ -11,7 +11,6 @@ import com.aurum.main.model.Vehicle;
 import com.aurum.main.repository.SearchStrategy;
 import com.aurum.main.repository.VehicleRepository;
 import lombok.Data;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +18,6 @@ import java.util.UUID;
 
 @Service
 @Data
-@Log
 public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final SearchStrategy<VehicleDTO, VehicleQuery> strategy;

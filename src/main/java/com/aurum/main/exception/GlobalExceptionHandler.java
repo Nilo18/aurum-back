@@ -42,7 +42,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
-        // Loop through all validation failures
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             if (!(error instanceof FieldError fieldError)) {
                 errors.put("error", error.getDefaultMessage());
@@ -65,7 +64,6 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        // Return an HTTP 400 Bad Request status with the clean map
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
@@ -109,18 +107,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
-    // 2. Handles database blockages (e.g., Foreign Key restrictions)
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<Map<String, String>> handleConflict(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
-    // 3. Handles unexpected system/database crashes
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Map<String, String>> handleDatabaseError(DataAccessException ex) {
-        ex.printStackTrace();
+        log.log(Level.SEVERE, "Database operation failed", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "A database error occurred. Please try again later."));
     }
 

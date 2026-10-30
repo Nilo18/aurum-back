@@ -30,7 +30,6 @@ import java.util.UUID;
 public class EventService {
     private final ClientRepository clientRepository;
     private final EventRepository eventRepository;
-//    private final EventRepositoryCustom eventRepositoryCustom;
     private final SearchStrategy<EventDTO, EventQuery> eventStrategy;
     private final MenuItemRepository menuItemRepository;
     private final MailService mailService;

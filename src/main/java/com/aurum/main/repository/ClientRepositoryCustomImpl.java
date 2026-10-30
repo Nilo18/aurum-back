@@ -61,7 +61,6 @@ public class ClientRepositoryCustomImpl implements SearchStrategy<ClientDTO, Cli
                 "SELECT COUNT(*) FROM client c WHERE 1 = 1"
         );
 
-// 2. Declarative filter assembly
         builder
                 .addCondition(
                         StringUtils.hasText(query.getSearch()),
@@ -77,7 +76,6 @@ public class ClientRepositoryCustomImpl implements SearchStrategy<ClientDTO, Cli
                                 query.getType().name() : null
                 );
 
-        // 3. Extract your final queries and parameters
         String finalSql = String.valueOf(builder.getSql());
         String finalCountSql = String.valueOf(builder.getCountSql());
         Map<String, Object> params = builder.getParams();

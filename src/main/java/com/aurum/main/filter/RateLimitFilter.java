@@ -65,7 +65,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return null;
         }
 
-        // Exclude the application's context path.
         String path = request.getRequestURI()
                 .substring(request.getContextPath().length());
 

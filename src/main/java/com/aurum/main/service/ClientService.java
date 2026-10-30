@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Data
 public class ClientService {
-//    private final ClientRepositoryCustom clientRepositoryCustom;
     private final ClientRepository clientRepository;
     private final SearchStrategy<ClientDTO, ClientQuery> clientStrategy;
     private final MaskedSearchStrategy<ClientDTO, ClientQuery> maskedClientStrategy;

@@ -39,7 +39,6 @@ public class EventRepositoryCustomImpl implements SearchStrategy<EventDTO, Event
                 "SELECT COUNT(*) FROM event e INNER JOIN client c ON e.client_id = c.id WHERE 1=1 "
         );
 
-// 2. Declarative filter assembly
         builder
                 .addCondition(
                         StringUtils.hasText(query.getSearch()),
@@ -79,7 +78,7 @@ public class EventRepositoryCustomImpl implements SearchStrategy<EventDTO, Event
                 )
                 .addCondition(
                         query.getEventTo() != null,
-                        " AND date <= :eventTo ", // Fixed to <= for upper bound range tracking
+                        " AND date <= :eventTo ",
                         "eventTo", query.getEventTo()
                 )
                 .addCondition(
@@ -95,7 +94,6 @@ public class EventRepositoryCustomImpl implements SearchStrategy<EventDTO, Event
                                 query.getStatus().name() : null
                 );
 
-        // 3. Extract your final queries and parameters
         String finalSql = String.valueOf(builder.getSql());
         String finalCountSql = String.valueOf(builder.getCountSql());
         Map<String, Object> params = builder.getParams();

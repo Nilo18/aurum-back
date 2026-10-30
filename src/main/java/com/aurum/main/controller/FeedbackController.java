@@ -35,7 +35,6 @@ public class FeedbackController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<PageResponse<FeedbackDTO>> getAllFeedback(
-//            @AuthenticationPrincipal AuthenticatedUser user,
             @Valid @ModelAttribute FeedbackQuery query) {
         return ResponseEntity.ok(feedbackService.getAllFeedback(query));
     }

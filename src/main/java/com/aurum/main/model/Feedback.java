@@ -19,5 +19,4 @@ public class Feedback {
     private Short rating;
     private String description;
 
-//    public record Key(Long eventId, Long id) {}
 }

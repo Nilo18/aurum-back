@@ -13,9 +13,6 @@ public record CreateFeedbackRequest(
         @Size(max = 100)
         String author,
 
-//        @NotNull
-//        @PastOrPresent
-//        LocalDate commentDate,
 
         @NotNull
         @Min(1)

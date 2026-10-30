@@ -28,7 +28,5 @@ public record UpdateEventRequest(
         Event.Location location,
         @NotNull(message = "Event status is required")
         Event.EventStatus status
-//        @NotNull(message = "Dishes from the menu must be selected")
-//        List<@NotBlank(message = "Menu item public ID is required") String> menuItemPublicIds
 ) {
 }

@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 public class VehicleQuery {
     private Integer page = 0;
     private Integer size = 10;
-//    private String search = "";
     private Vehicle.VehicleType type;
     private Long passengerFrom;
     private Long passengerTo;

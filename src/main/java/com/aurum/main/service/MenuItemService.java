@@ -11,7 +11,6 @@ import com.aurum.main.model.MenuItem;
 import com.aurum.main.repository.MenuItemRepository;
 import com.aurum.main.repository.SearchStrategy;
 import lombok.Data;
-import lombok.extern.java.Log;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -22,7 +21,6 @@ import java.util.UUID;
 
 @Service
 @Data
-@Log
 public class MenuItemService {
     private final MenuItemRepository menuItemRepository;
     private final SearchStrategy<MenuItemDTO, MenuItemQuery> searchStrategy;
@@ -55,7 +53,6 @@ public class MenuItemService {
         menuItem.setType(data.type());
         menuItem.setPricePerPerson(data.pricePerPerson());
         menuItemRepository.save(menuItem);
-        log.info("SAVED THE MENU ITEM");
 
         return new MenuItemDTO(
                 publicId,

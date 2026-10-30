@@ -53,7 +53,6 @@ class FeedbackControllerTests extends ControllerTestSupport {
     }
 
     @Test void anonymousFeedbackListRequiresAuthentication() throws Exception {
-        // HTTP authorization rejects anonymous access before method security.
         mvc.perform(get("/api/feedback")).andExpect(status().isUnauthorized());
         verifyNoInteractions(feedbackService);
     }
