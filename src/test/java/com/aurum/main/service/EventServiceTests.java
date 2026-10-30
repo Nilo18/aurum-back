@@ -25,7 +25,8 @@ class EventServiceTests {
     @Mock EventRepository events;
     @Mock SearchStrategy<EventDTO, EventQuery> search;
     @Mock MenuItemRepository menu;
-    @Mock MailService mail;
+    @Mock
+    MailStrategy mail;
     @Mock OtpService otp;
     @Mock FeedbackInvitationRepository invitations;
     @InjectMocks EventService service;

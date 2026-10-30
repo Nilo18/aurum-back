@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Data
 public class HomeService {
-    private final MailService mailService;
+    private final MailStrategy mailStrategy;
     private final OtpService otpService;
 
     public OtpResponse sendContactRequestVerification(EmailRequest emailReq) {
         var otpRes = otpService.generateOtp(emailReq.email(), OtpPurpose.CONTACT);
 
-        mailService.formatAndSend(
+        mailStrategy.formatAndSend(
                 "nikalongurashvili@gmail.com",
                 emailReq.email(),
                 "Contact Request Verification",
@@ -36,7 +36,7 @@ public class HomeService {
             throw new InvalidOtpException("Invalid verification code");
         }
 
-        mailService.formatAndSend(
+        mailStrategy.formatAndSend(
                 request.emailAddress(),
                 "nikalongurashvili@gmail.com",
                 "Aurum Question",

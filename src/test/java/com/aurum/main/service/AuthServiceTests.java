@@ -20,7 +20,8 @@ import static org.mockito.Mockito.*;
 class AuthServiceTests {
 
     @Mock OtpService otp;
-    @Mock MailService mail;
+    @Mock
+    MailStrategy mail;
     @Mock EmployeeRepository employees;
     @Mock org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder;
     @Mock JwtService jwt;

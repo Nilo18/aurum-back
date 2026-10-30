@@ -7,7 +7,6 @@ import com.aurum.main.exception.*;
 import com.aurum.main.model.*;
 import com.aurum.main.repository.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,13 +16,13 @@ import java.time.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTests {
 
     @Mock InvitationRepository invitations;
-    @Mock MailService mail;
+    @Mock
+    MailStrategy mail;
     @Mock EmployeeRepository employees;
     @Mock org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder;
     @Mock JwtService jwt;

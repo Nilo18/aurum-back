@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Data
 public class AuthService {
     private final OtpService otpService;
-    private final MailService mailService;
+    private final MailStrategy mailStrategy;
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -27,7 +27,7 @@ public class AuthService {
     public OtpResponse verifyLoginRequest(EmailRequest request) {
         var otpRes = otpService.generateOtp(request.email(), OtpPurpose.LOGIN);
 
-        mailService.formatAndSend(
+        mailStrategy.formatAndSend(
                 "nikalongurashvili@gmail.com",
                 request.email(),
                 "Login Request Verification",

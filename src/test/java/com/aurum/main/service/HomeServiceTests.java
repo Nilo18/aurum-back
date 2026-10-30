@@ -16,7 +16,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class HomeServiceTests {
 
-    @Mock MailService mail;
+    @Mock
+    MailStrategy mail;
     @Mock OtpService otp;
     @InjectMocks HomeService service;
     private final ContactRequest request = new ContactRequest("Alice", "+995555123456",

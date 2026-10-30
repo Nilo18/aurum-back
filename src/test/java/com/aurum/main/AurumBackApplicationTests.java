@@ -1,6 +1,7 @@
 package com.aurum.main;
 
 import com.aurum.main.repository.*;
+import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
@@ -8,6 +9,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 // Verify real application wiring without requiring a database, SMTP server, or secrets.
+@ActiveProfiles("local")
 @SpringBootTest(properties = {
         "jwt.secret=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
         "jwt.expiration-ms=43200000",

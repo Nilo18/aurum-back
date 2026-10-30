@@ -1,6 +1,5 @@
 package com.aurum.main.service;
 
-import com.aurum.main.dto.ClientDTO;
 import com.aurum.main.dto.EmployeeDTO;
 import com.aurum.main.dto.requests.*;
 import com.aurum.main.dto.responses.AuthResponse;
@@ -27,7 +26,7 @@ import java.util.UUID;
 @Data
 public class EmployeeService {
     private final InvitationRepository invitationRepository;
-    private final MailService mailService;
+    private final MailStrategy mailStrategy;
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -66,7 +65,7 @@ public class EmployeeService {
         invitationRepository.save(invitation);
 
         String link = "http://localhost:4200/staff-register?token=" + token;
-        mailService.formatAndSend(
+        mailStrategy.formatAndSend(
                 ownerMail,
                 request.email(),
                 "Aurum Employee Invitation",

@@ -32,14 +32,14 @@ public class EventService {
     private final EventRepository eventRepository;
     private final SearchStrategy<EventDTO, EventQuery> eventStrategy;
     private final MenuItemRepository menuItemRepository;
-    private final MailService mailService;
+    private final MailStrategy mailStrategy;
     private final OtpService otpService;
     private final FeedbackInvitationRepository feedbackInvitationRepository;
 
     public OtpResponse verifyCreateEventRequest(EmailRequest request) {
         var otpResponse = otpService.generateOtp(request.email(), OtpPurpose.CREATE_EVENT);
 
-        mailService.formatAndSend(
+        mailStrategy.formatAndSend(
                 "nikalongurashvili@gmail.com",
                 request.email(),
                 "Event Creation Request Verification",
@@ -136,7 +136,7 @@ public class EventService {
 
             String link = "http://localhost:4200/feedback?token=" + token;
 
-            mailService.formatAndSend(
+            mailStrategy.formatAndSend(
                     "nikalongurashvili@gmail.com",
                     client.getEmail(),
                     "Feedback Request",

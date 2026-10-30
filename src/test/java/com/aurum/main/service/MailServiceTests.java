@@ -1,29 +1,20 @@
 package com.aurum.main.service;
 
-import com.aurum.main.dto.*;
-import com.aurum.main.dto.requests.*;
-import com.aurum.main.dto.responses.*;
-import com.aurum.main.exception.*;
-import com.aurum.main.model.*;
-import com.aurum.main.repository.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.math.BigDecimal;
-import java.time.*;
-import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class MailServiceTests {
 
     @Mock org.springframework.mail.javamail.JavaMailSender sender;
-    @InjectMocks MailService service;
+    @InjectMocks
+    SmtpMailService service;
 
     @Test void sendsAllMessageFields() {
         service.formatAndSend("from@example.com", "to@example.com", "Subject", "Body");
